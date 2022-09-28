@@ -26,7 +26,7 @@ This gem aims to provide a very high-level API for conversion. The most
 basic usage is:
 
 ```ruby
-raw_draftjs = { blocks: [{ text: 'Hello world!' }], entityMap: {} }
+raw_draftjs = { 'blocks' => [{ 'text' => 'Hello world!' }], 'entityMap' => {} }
 DraftjsHtml.to_html(raw_draftjs) # => <p>Hello world!</p>
 ```
 
@@ -36,19 +36,19 @@ to the top-level conversion method(s) for describing how to translate your
 content. One example might look like:
 
 ```ruby
-raw_draftjs = { 
-  blocks: [
+raw_draftjs = {
+  'blocks' => [
     {
-      text: 'Hello @Arya!',
-      entityRanges: [{ key: 'abc', offset: 6, length: 5 }],
+      'text' => 'Hello @Arya!',
+      'entityRanges' => [{ 'key' => 'abc', 'offset' => 6, 'length' => 5 }],
     }
   ],
-  entityMap: {
-    'abc': {
-      mutability: 'IMMUTABLE',
-      type: 'mention',
-      data: {
-        user_id: 123
+  'entityMap' => {
+    'abc' => {
+      'mutability' => 'IMMUTABLE',
+      'type' => 'mention',
+      'data' => {
+        'user_id' => 123
       },
     },
   },
@@ -56,7 +56,7 @@ raw_draftjs = {
 
 DraftjsHtml.to_html(raw_draftjs, {
   style_entity: ->(entity) {
-    
+
   },
 }) # => <p>Hello </p>
 ```
