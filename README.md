@@ -1,16 +1,16 @@
 # DraftjsHtml
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/draftjs_html`. To experiment with that code, run `bin/console` for an interactive prompt.
+This gem provides conversion utilities between "raw" [DraftJS] JSON and HTML.
+My team and I have found a need on many occasions to manipulate and convert
+DraftJS on our Ruby backend - this library is the result.
 
-TODO: Delete this and the text above, and describe your gem
+[DraftJS]: https://draftjs.org/
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-```ruby
-gem 'draftjs_html'
-```
+```ruby gem 'draftjs_html' ```
 
 And then execute:
 
@@ -22,22 +22,76 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+This gem aims to provide a very high-level API for conversion. The most
+basic usage is:
+
+```ruby
+raw_draftjs = { blocks: [{ text: 'Hello world!' }], entityMap: {} }
+DraftjsHtml.to_html(raw_draftjs) # => <p>Hello world!</p>
+```
+
+Things can get more complicated as you have custom entities and/or inline
+styles. If this is the case, you can supply various configuration options
+to the top-level conversion method(s) for describing how to translate your
+content. One example might look like:
+
+```ruby
+raw_draftjs = { 
+  blocks: [
+    {
+      text: 'Hello @Arya!',
+      entityRanges: [{ key: 'abc', offset: 6, length: 5 }],
+    }
+  ],
+  entityMap: {
+    'abc': {
+      mutability: 'IMMUTABLE',
+      type: 'mention',
+      data: {
+        user_id: 123
+      },
+    },
+  },
+}
+
+DraftjsHtml.to_html(raw_draftjs, {
+  style_entity: ->(entity) {
+    
+  },
+}) # => <p>Hello </p>
+```
+
+Almost all of the options support Procs (or otherwise `.call`-ables) to provide
+flexibility in the conversion process. As the library uses Nokogiri to generate
+HTML, it's also possible to return `Nokogiri::Node` objects or String objects.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run
+`rake spec` to run the tests. You can also run `bin/console` for an interactive
+prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`. To
+release a new version, update the version number in `version.rb`, and then run
+`bundle exec rake release`, which will create a git tag for the version, push
+git commits and the created tag, and push the `.gem` file to
+[rubygems.org](https://rubygems.org).
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/draftjs_html. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/draftjs_html/blob/main/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at
+https://github.com/dugancathal/draftjs_html. This project is intended to be a
+safe, welcoming space for collaboration, and contributors are expected to adhere
+to the [code of
+conduct](https://github.com/dugancathal/draftjs_html/blob/main/CODE_OF_CONDUCT.md).
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+The gem is available as open source under the terms of the [MIT
+License](https://opensource.org/licenses/MIT).
 
 ## Code of Conduct
 
-Everyone interacting in the DraftjsHtml project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/draftjs_html/blob/main/CODE_OF_CONDUCT.md).
+Everyone interacting in the DraftjsHtml project's codebases, issue trackers,
+chat rooms and mailing lists is expected to follow the [code of
+conduct](https://github.com/dugancathal/draftjs_html/blob/main/CODE_OF_CONDUCT.md).
