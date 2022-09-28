@@ -5,7 +5,9 @@ RSpec.describe DraftjsHtml do
     expect(DraftjsHtml::VERSION).not_to be nil
   end
 
-  it "does something useful" do
-    expect(false).to eq(true)
+  it 'generates valid HTML from the most basic of DraftJS' do
+    html = described_class.to_html({ 'blocks' => [{ 'text' => 'Hello world!' }], 'entityMap' => {} })
+
+    expect(html).to eq '<p>Hello world!</p>'
   end
 end
