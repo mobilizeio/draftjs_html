@@ -6,6 +6,6 @@ module DraftjsHtml
   class Error < StandardError; end
 
   def self.to_html(raw_draftjs)
-    "<p>#{raw_draftjs.dig('blocks', 0, 'text')}</p>"
+    raw_draftjs['blocks'].map { "<p>#{_1['text']}</p>" }.join("\n")
   end
 end
