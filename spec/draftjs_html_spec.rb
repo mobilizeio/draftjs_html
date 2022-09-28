@@ -26,6 +26,34 @@ RSpec.describe DraftjsHtml do
     expect(html).to eq "<p>Hello world!</p>\n<p>Winter is coming.</p>"
   end
 
+  it 'renders the various block types as their appropriate HTML elements' do
+    raw_draftjs = RawDraftJs.build do
+      block_type 'unstyled', 'plain text'
+      block_type 'paragraph', 'lorem ipsum'
+      block_type 'header-one', 'h1'
+      block_type 'header-two', 'h2'
+      block_type 'header-three', 'h3'
+      block_type 'header-four', 'h4'
+      block_type 'header-five', 'h5'
+      block_type 'header-six', 'h6'
+      block_type 'blockquote', 'minaswan'
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq <<~HTML.strip
+      <p>plain text</p>
+      <p>lorem ipsum</p>
+      <h1>h1</h1>
+      <h2>h2</h2>
+      <h3>h3</h3>
+      <h4>h4</h4>
+      <h5>h5</h5>
+      <h6>h6</h6>
+      <blockquote>minaswan</blockquote>
+    HTML
+  end
+
   private
 
   class RawDraftJs
@@ -41,7 +69,11 @@ RSpec.describe DraftjsHtml do
     end
 
     def text_block(text)
-      @blocks << { 'text' => text }
+      block_type('unstyled', text)
+    end
+
+    def block_type(type, text)
+      @blocks << { 'text' => text, 'type' => type }
     end
 
     def to_h
