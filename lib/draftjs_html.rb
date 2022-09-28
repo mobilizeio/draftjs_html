@@ -13,9 +13,9 @@ module DraftjsHtml
           body.public_send(element_for(block['type']), block['text'])
         end
       end
-    end.to_html
+    end.doc
 
-    Nokogiri::HTML(document).css('body').first.children.to_html.strip
+    document.css('body').first.children.to_html.strip
   end
 
   private_class_method def self.element_for(type)
