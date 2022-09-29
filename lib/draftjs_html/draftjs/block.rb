@@ -11,18 +11,11 @@ module DraftjsHtml
         text.length
       end
 
-      CharMeta = Struct.new(:char, :style_names, keyword_init: true)
-      StyleRange = Struct.new(:name, :range, keyword_init: true) do
-        def self.parse(raw)
-          new(name: raw['style'], range: (raw['offset']..(raw['offset'] + raw['length'] - 1)))
-        end
-      end
-
       def each_char
         return to_enum(:each_char) unless block_given?
 
         text.chars.map.with_index do |char, index|
-          yield CharMeta.new(char: char, style_names: inline_styles.select { _1.range.cover?(index) }.map(&:name))
+          yield CharacterMeta.new(char: char, style_names: inline_styles.select { _1.range.cover?(index) }.map(&:name))
         end
       end
 
