@@ -46,11 +46,9 @@ module DraftjsHtml
               end
             end
 
-            body.public_send(@options[:block_type_mapping].fetch(block.type)) do |block_body|
+            body.public_send(block_element_for(block)) do |block_body|
               block.each_range do |char_range|
-                entity = draftjs.find_entity(char_range.entity_key)
-                content = char_range.text
-                content = @options[:style_entity].call(entity, char_range.text) if entity
+                content = try_apply_entity_to(draftjs, char_range)
 
                 apply_styles_to(block_body, char_range.style_names, content)
               end
@@ -68,9 +66,24 @@ module DraftjsHtml
       return html.parent << text if style_names.empty?
 
       style, *rest = style_names
-      html.public_send(@options[:inline_style_mapping][style]) do
+      html.public_send(style_element_for(style)) do
         apply_styles_to(html, rest, text)
       end
+    end
+
+    def block_element_for(block)
+      @options[:block_type_mapping].fetch(block.type)
+    end
+
+    def style_element_for(style)
+      @options[:inline_style_mapping][style]
+    end
+
+    def try_apply_entity_to(draftjs, char_range)
+      entity = draftjs.find_entity(char_range.entity_key)
+      content = char_range.text
+      content = @options[:style_entity].call(entity, content) if entity
+      content
     end
 
     def push_nesting(builder, tagname)
