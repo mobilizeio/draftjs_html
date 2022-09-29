@@ -28,17 +28,14 @@ module DraftjsHtml
   def self.to_html(raw_draftjs)
     document = Nokogiri::HTML::Builder.new do |html|
       html.body do |body|
-        previous_parent = body.parent
-
+        @previous_parent = body.parent
         raw_draftjs['blocks'].each do |block|
           new_wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block['type']]
           if body.parent.name != new_wrapper_tag
             if new_wrapper_tag
-              node = create_child(body, new_wrapper_tag)
-              previous_parent = body.parent
-              body.parent = node
+              push_nesting(body, new_wrapper_tag)
             else
-              body.parent = previous_parent
+              pop_nesting(body)
             end
           end
 
@@ -48,6 +45,16 @@ module DraftjsHtml
     end.doc
 
     document.css('body').first.children.to_html.strip
+  end
+
+  private_class_method def self.push_nesting(builder, tagname)
+    node = create_child(builder, tagname)
+    @previous_parent = builder.parent
+    builder.parent = node
+  end
+
+  private_class_method def self.pop_nesting(builder)
+    builder.parent = @previous_parent
   end
 
   private_class_method def self.create_child(builder, tagname)
