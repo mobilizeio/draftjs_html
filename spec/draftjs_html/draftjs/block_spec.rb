@@ -81,4 +81,23 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
       { text: ' coming', style_names: [] },
     ]
   end
+
+  it 'can return ranges of characters that all share the same styles, coalesced with their entities' do
+    raw = RawDraftJs.build do
+      text_block 'Winter is coming'
+      inline_style 'ITALIC', 7..8
+      inline_style 'BOLD', 0..8
+      entity_range 'mention-1', 0..5
+    end
+    block = described_class.parse(raw.dig('blocks', 0))
+
+    char_ranges = block.each_range.to_a.map { { text: _1.text, style_names: _1.style_names, entity_key: _1.entity_key } }
+
+    expect(char_ranges).to eq [
+      { text: 'Winter', style_names: ['BOLD'], entity_key: 'mention-1' },
+      { text: ' ', style_names: ['BOLD'], entity_key: nil },
+      { text: 'is', style_names: ['ITALIC', 'BOLD'], entity_key: nil },
+      { text: ' coming', style_names: [], entity_key: nil },
+    ]
+  end
 end
