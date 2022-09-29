@@ -54,6 +54,48 @@ RSpec.describe DraftjsHtml do
     HTML
   end
 
+  it 'renders the "double-element" block types as their appropriate HTML elements' do
+    raw_draftjs = RawDraftJs.build do
+      block_type 'code-block', 'puts "hello"'
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq <<~HTML.strip
+      <pre><code>puts "hello"</code></pre>
+    HTML
+  end
+
+  it 'renders the peer list-item block types as the same list' do
+    raw_draftjs = RawDraftJs.build do
+      block_type 'ordered-list-item', 'item 1'
+      block_type 'ordered-list-item', 'item 2'
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq <<~HTML.strip
+      <ol>
+      <li>item 1</li>
+      <li>item 2</li>
+      </ol>
+    HTML
+  end
+
+  it 'can have non-peer block-types after a peer block-type' do
+    raw_draftjs = RawDraftJs.build do
+      block_type 'ordered-list-item', 'item 1'
+      text_block 'afterward'
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq <<~HTML.strip
+      <ol><li>item 1</li></ol>
+      <p>afterward</p>
+    HTML
+  end
+
   private
 
   class RawDraftJs
