@@ -19,6 +19,26 @@ module DraftjsHtml
         end
       end
 
+      CharRange = Struct.new(:text, :style_names, keyword_init: true)
+      def each_range
+        return to_enum(:each_range) unless block_given?
+
+        current_styles = []
+        ranges = [CharRange.new(text: '', style_names: current_styles)]
+
+        each_char.with_index do |char, index|
+          if char.style_names != current_styles
+            current_styles = char.style_names
+            yield(ranges.last) unless index == 0
+            ranges << CharRange.new(text: '', style_names: current_styles)
+          end
+
+          ranges.last.text += char.char
+        end
+
+        yield ranges.last
+      end
+
       alias plaintext text
 
       private

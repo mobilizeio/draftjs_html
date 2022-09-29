@@ -20,6 +20,10 @@ class RawDraftJs
     @blocks << { 'key' => SecureRandom.urlsafe_base64(10), 'text' => text, 'type' => type }
   end
 
+  def inline_style(style_name, range)
+    (@blocks.last['inlineStyleRanges'] ||= []) << { 'style' => style_name, 'offset' => range.begin, 'length' => range.size }
+  end
+
   def to_h
     {
       'blocks' => @blocks,
