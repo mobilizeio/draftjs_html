@@ -2,7 +2,7 @@
 
 require_relative 'draftjs/content'
 require_relative 'draftjs/character_meta'
-require_relative 'draftjs/style_range'
+require_relative 'draftjs/applicable_range'
 require_relative 'draftjs/block'
 
 module DraftjsHtml

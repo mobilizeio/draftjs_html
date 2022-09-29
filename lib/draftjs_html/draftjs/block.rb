@@ -57,13 +57,13 @@ module DraftjsHtml
 
       def inline_styles
         @inline_styles ||= inline_style_ranges.map do |raw|
-          StyleRange.parse(raw['style'], raw)
+          ApplicableRange.parse(raw['style'], raw)
         end
       end
 
       def entity_ranges
         @entity_ranges ||= raw_entity_ranges.map do |raw|
-          StyleRange.parse(raw['key'], raw)
+          ApplicableRange.parse(raw['key'], raw)
         end
       end
     end
