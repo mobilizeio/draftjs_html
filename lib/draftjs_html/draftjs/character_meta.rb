@@ -2,6 +2,6 @@
 
 module DraftjsHtml
   module Draftjs
-    CharacterMeta = Struct.new(:char, :style_names, keyword_init: true)
+    CharacterMeta = Struct.new(:char, :style_names, :entity_key, keyword_init: true)
   end
 end

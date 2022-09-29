@@ -51,6 +51,22 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
     ]
   end
 
+  it 'applies entities to ranges of characters, too' do
+    raw = RawDraftJs.build do
+      text_block 'Winter is coming'
+      entity_range 'entity-key', 7..8
+    end
+    block = described_class.parse(raw.dig('blocks', 0))
+
+    expect(block.each_char.to_a.map(&:entity_key)).to eq [
+      nil, nil, nil, nil, nil, nil,
+      nil,
+      'entity-key', 'entity-key',
+      nil,
+      nil, nil, nil, nil, nil, nil,
+    ]
+  end
+
   it 'can return ranges of characters that all share the same styles' do
     raw = RawDraftJs.build do
       text_block 'Winter is coming'

@@ -24,6 +24,10 @@ class RawDraftJs
     (@blocks.last['inlineStyleRanges'] ||= []) << { 'style' => style_name, 'offset' => range.begin, 'length' => range.size }
   end
 
+  def entity_range(key, range)
+    (@blocks.last['entityRanges'] ||= []) << { 'key' => key, 'offset' => range.begin, 'length' => range.size }
+  end
+
   def to_h
     {
       'blocks' => @blocks,
