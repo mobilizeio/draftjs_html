@@ -1,3 +1,5 @@
+require 'securerandom'
+
 class RawDraftJs
   def self.build(&block)
     instance = new
@@ -15,7 +17,7 @@ class RawDraftJs
   end
 
   def block_type(type, text)
-    @blocks << { 'text' => text, 'type' => type }
+    @blocks << { 'key' => SecureRandom.urlsafe_base64(10), 'text' => text, 'type' => type }
   end
 
   def to_h
