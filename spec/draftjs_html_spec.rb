@@ -96,6 +96,23 @@ RSpec.describe DraftjsHtml do
     HTML
   end
 
+  it 'allows customizing the block type elements' do
+    raw_draftjs = RawDraftJs.build do
+      block_type 'arbitrary-block-type', 'opening section'
+      text_block 'will still be rendered using defaults'
+    end
+
+    html = described_class.to_html(raw_draftjs, options: {
+      block_type_mapping: {
+        'arbitrary-block-type' => 'section',
+      }
+    })
+
+    expect(html).to eq <<~HTML.strip
+      <section>opening section</section><p>will still be rendered using defaults</p>
+    HTML
+  end
+
   it 'can apply inlineStyleRanges' do
     raw_draftjs = RawDraftJs.build do
       text_block 'afterward'

@@ -46,7 +46,7 @@ module DraftjsHtml
               end
             end
 
-            body.public_send(BLOCK_TYPE_TO_HTML.fetch(block.type)) do |block_body|
+            body.public_send(options[:block_type_mapping].fetch(block.type)) do |block_body|
               block.each_range do |char_range|
                 entity = draftjs.find_entity(char_range.entity_key)
                 content = char_range.text
@@ -89,6 +89,7 @@ module DraftjsHtml
 
     def ensure_options!(opts)
       opts[:style_entity] ||= ->(_entity, chars) { chars }
+      opts[:block_type_mapping] = BLOCK_TYPE_TO_HTML.merge(opts[:block_type_mapping] || {})
       opts
     end
   end
