@@ -25,12 +25,14 @@ module DraftjsHtml
     end
 
     def convert(raw_draftjs)
+      draftjs = Draftjs.parse(raw_draftjs)
+
       @document.html do |html|
         html.body do |body|
           @previous_parent = body.parent
 
-          raw_draftjs['blocks'].each do |block|
-            new_wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block['type']]
+          draftjs.blocks.each do |block|
+            new_wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
             if body.parent.name != new_wrapper_tag
               if new_wrapper_tag
                 push_nesting(body, new_wrapper_tag)
@@ -39,7 +41,7 @@ module DraftjsHtml
               end
             end
 
-            body.public_send(BLOCK_TYPE_TO_HTML.fetch(block['type']), block['text'])
+            body.public_send(BLOCK_TYPE_TO_HTML.fetch(block.type), block.text)
           end
         end
       end
