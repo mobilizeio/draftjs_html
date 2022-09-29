@@ -9,6 +9,6 @@ module DraftjsHtml
   class Error < StandardError; end
 
   def self.to_html(raw_draftjs, options: {})
-    ToHtml.new.convert(raw_draftjs, options: options)
+    ToHtml.new(options).convert(raw_draftjs)
   end
 end

@@ -24,13 +24,13 @@ module DraftjsHtml
       'ITALIC' => 'i',
     }.freeze
 
-    def initialize
+    def initialize(options)
       @document = Nokogiri::HTML::Builder.new
+      @options = ensure_options!(options)
     end
 
-    def convert(raw_draftjs, options:)
+    def convert(raw_draftjs)
       draftjs = Draftjs.parse(raw_draftjs)
-      options = ensure_options!(options)
 
       @document.html do |html|
         html.body do |body|
@@ -46,11 +46,11 @@ module DraftjsHtml
               end
             end
 
-            body.public_send(options[:block_type_mapping].fetch(block.type)) do |block_body|
+            body.public_send(@options[:block_type_mapping].fetch(block.type)) do |block_body|
               block.each_range do |char_range|
                 entity = draftjs.find_entity(char_range.entity_key)
                 content = char_range.text
-                content = options[:style_entity].call(entity, char_range.text) if entity
+                content = @options[:style_entity].call(entity, char_range.text) if entity
 
                 apply_styles_to(block_body, char_range.style_names, content)
               end
