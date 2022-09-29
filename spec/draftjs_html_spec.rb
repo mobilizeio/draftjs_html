@@ -95,4 +95,31 @@ RSpec.describe DraftjsHtml do
       <p>afterward</p>
     HTML
   end
+
+  it 'can apply inlineStyleRanges' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'afterward'
+      inline_style 'BOLD', 5..8
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq <<~HTML.strip
+      <p>after<b>ward</b></p>
+    HTML
+  end
+
+  it 'generates valid HTML when inline styles overlap' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'afterward'
+      inline_style 'BOLD', 5..8
+      inline_style 'ITALIC', 0..5
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq <<~HTML.strip
+      <p><i>after</i><b><i>w</i></b><b>ard</b></p>
+    HTML
+  end
 end

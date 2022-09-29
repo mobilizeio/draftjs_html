@@ -19,6 +19,10 @@ module DraftjsHtml
       'ordered-list-item' => 'ol',
       'unordered-list-item' => 'ul',
     }.freeze
+    STYLE_MAP = {
+      'BOLD' => 'b',
+      'ITALIC' => 'i',
+    }.freeze
 
     def initialize
       @document = Nokogiri::HTML::Builder.new
@@ -41,7 +45,11 @@ module DraftjsHtml
               end
             end
 
-            body.public_send(BLOCK_TYPE_TO_HTML.fetch(block.type), block.text)
+            body.public_send(BLOCK_TYPE_TO_HTML.fetch(block.type)) do |block_body|
+              block.each_range do |char_range|
+                apply_styles_to(block_body, char_range.style_names, char_range.text)
+              end
+            end
           end
         end
       end
@@ -50,6 +58,15 @@ module DraftjsHtml
     end
 
     private
+
+    def apply_styles_to(html, style_names, text)
+      return html.text(text) if style_names.empty?
+
+      style, *rest = style_names
+      html.public_send(STYLE_MAP[style]) do
+        apply_styles_to(html, rest, text)
+      end
+    end
 
     def push_nesting(builder, tagname)
       node = create_child(builder, tagname)
