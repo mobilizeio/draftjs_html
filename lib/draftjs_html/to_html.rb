@@ -28,8 +28,9 @@ module DraftjsHtml
       @document = Nokogiri::HTML::Builder.new
     end
 
-    def convert(raw_draftjs)
+    def convert(raw_draftjs, options:)
       draftjs = Draftjs.parse(raw_draftjs)
+      options = ensure_options!(options)
 
       @document.html do |html|
         html.body do |body|
@@ -47,7 +48,11 @@ module DraftjsHtml
 
             body.public_send(BLOCK_TYPE_TO_HTML.fetch(block.type)) do |block_body|
               block.each_range do |char_range|
-                apply_styles_to(block_body, char_range.style_names, char_range.text)
+                entity = draftjs.find_entity(char_range.entity_key)
+                content = char_range.text
+                content = options[:style_entity].call(entity, char_range.text) if entity
+
+                apply_styles_to(block_body, char_range.style_names, content)
               end
             end
           end
@@ -60,7 +65,7 @@ module DraftjsHtml
     private
 
     def apply_styles_to(html, style_names, text)
-      return html.text(text) if style_names.empty?
+      return html.parent << text if style_names.empty?
 
       style, *rest = style_names
       html.public_send(STYLE_MAP[style]) do
@@ -80,6 +85,11 @@ module DraftjsHtml
 
     def create_child(builder, tagname)
       builder.parent.add_child(builder.doc.create_element(tagname))
+    end
+
+    def ensure_options!(opts)
+      opts[:style_entity] ||= ->(_entity, chars) { chars }
+      opts
     end
   end
 end

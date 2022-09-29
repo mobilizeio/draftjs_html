@@ -8,7 +8,7 @@ require_relative 'draftjs_html/to_html'
 module DraftjsHtml
   class Error < StandardError; end
 
-  def self.to_html(raw_draftjs)
-    ToHtml.new.convert(raw_draftjs)
+  def self.to_html(raw_draftjs, options: {})
+    ToHtml.new.convert(raw_draftjs, options: options)
   end
 end

@@ -122,4 +122,52 @@ RSpec.describe DraftjsHtml do
       <p><i>after</i><b><i>w</i></b><b>ard</b></p>
     HTML
   end
+
+  it 'renders the raw character text for an entity that has no defined style' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'afterward'
+      apply_entity 'mention', 0..8, data: { url: 'https://example.com/users/1' }
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq <<~HTML.strip
+      <p>afterward</p>
+    HTML
+  end
+
+  it 'allows consumers to specify how entities are converted to HTML' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'afterward'
+      apply_entity 'mention', 0..8, data: { url: 'https://example.com/users/1' }
+    end
+
+    html = described_class.to_html(raw_draftjs, options: {
+      style_entity: ->(entity, content) {
+        "<a href=#{entity.data['url']}>#{content}</a>"
+      }
+    })
+
+    expect(html).to eq <<~HTML.strip
+      <p><a href="https://example.com/users/1">afterward</a></p>
+    HTML
+  end
+
+  it 'applies styles to entity-wrapped content' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'hey @sansa'
+      apply_entity 'mention', 4..9, data: { url: 'https://example.com/users/1' }
+      inline_style 'BOLD', 0..9
+    end
+
+    html = described_class.to_html(raw_draftjs, options: {
+      style_entity: ->(entity, content) {
+        "<a href=#{entity.data['url']}>#{content}</a>"
+      }
+    })
+
+    expect(html).to eq <<~HTML.strip
+      <p><b>hey </b><b><a href="https://example.com/users/1">@sansa</a></b></p>
+    HTML
+  end
 end
