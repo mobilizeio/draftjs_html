@@ -37,14 +37,7 @@ module DraftjsHtml
           @previous_parent = body.parent
 
           draftjs.blocks.each do |block|
-            new_wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
-            if body.parent.name != new_wrapper_tag
-              if new_wrapper_tag
-                push_nesting(body, new_wrapper_tag)
-              else
-                pop_nesting(body)
-              end
-            end
+            ensure_nesting_depth(block, body)
 
             body.public_send(block_element_for(block)) do |block_body|
               block.each_range do |char_range|
@@ -61,6 +54,17 @@ module DraftjsHtml
     end
 
     private
+
+    def ensure_nesting_depth(block, body)
+      new_wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
+      if body.parent.name != new_wrapper_tag
+        if new_wrapper_tag
+          push_nesting(body, new_wrapper_tag)
+        else
+          pop_nesting(body)
+        end
+      end
+    end
 
     def apply_styles_to(html, style_names, text)
       return html.parent << text if style_names.empty?
