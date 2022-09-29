@@ -20,4 +20,19 @@ RSpec.describe DraftjsHtml::Draftjs do
     expect(block.length).to eq 10
     expect(block.plaintext).to eq 'hey there!'
   end
+
+  it 'parses and stores entities from the entityMap' do
+    draftjs = described_class.parse(RawDraftJs.build do
+      text_block '@sansa'
+      apply_entity 'mention', 0..5, key: 'mention-1', mutability: 'MUTABLE', data: {
+        url: 'https://example.com/users/sansa'
+      }
+    end)
+
+    expect(draftjs.entity_map.size).to eq 1
+
+    entity = draftjs.find_entity 'mention-1'
+    expect(entity.mutability).to eq 'MUTABLE'
+    expect(entity.data).to eq('url' => 'https://example.com/users/sansa')
+  end
 end
