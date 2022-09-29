@@ -68,7 +68,7 @@ module DraftjsHtml
       return html.parent << text if style_names.empty?
 
       style, *rest = style_names
-      html.public_send(STYLE_MAP[style]) do
+      html.public_send(@options[:inline_style_mapping][style]) do
         apply_styles_to(html, rest, text)
       end
     end
@@ -90,6 +90,7 @@ module DraftjsHtml
     def ensure_options!(opts)
       opts[:style_entity] ||= ->(_entity, chars) { chars }
       opts[:block_type_mapping] = BLOCK_TYPE_TO_HTML.merge(opts[:block_type_mapping] || {})
+      opts[:inline_style_mapping] = STYLE_MAP.merge(opts[:inline_style_mapping] || {})
       opts
     end
   end

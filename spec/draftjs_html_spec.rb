@@ -113,6 +113,23 @@ RSpec.describe DraftjsHtml do
     HTML
   end
 
+  it 'allows customizing the inline style elements' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'Winter is coming'
+      inline_style 'BOLD', 7..8
+    end
+
+    html = described_class.to_html(raw_draftjs, options: {
+      inline_style_mapping: {
+        'BOLD' => 'strong',
+      }
+    })
+
+    expect(html).to eq <<~HTML.strip
+      <p>Winter <strong>is</strong> coming</p>
+    HTML
+  end
+
   it 'can apply inlineStyleRanges' do
     raw_draftjs = RawDraftJs.build do
       text_block 'afterward'
