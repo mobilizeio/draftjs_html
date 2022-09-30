@@ -55,8 +55,10 @@ raw_draftjs = {
 }
 
 DraftjsHtml.to_html(raw_draftjs, {
-  style_entity: ->(entity) {
-
+  entity_style_mappings:  {
+    link: ->(entity, content) {
+      %Q{<a href="#{entity.data['url']}">#{content}</a>}
+    },
   },
 }) # => <p>Hello </p>
 ```
