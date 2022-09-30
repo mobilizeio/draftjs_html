@@ -23,6 +23,8 @@ module DraftjsHtml
     STYLE_MAP = {
       'BOLD' => 'b',
       'ITALIC' => 'i',
+      'STRIKETHROUGH' => 'del',
+      'UNDERLINE' => 'u',
     }.freeze
 
     DEFAULT_ENTITY_STYLE_FN = ->(_entity, chars) { chars }
