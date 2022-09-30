@@ -53,8 +53,6 @@ module DraftjsHtml
 
       alias plaintext text
 
-      private
-
       def inline_styles
         @inline_styles ||= inline_style_ranges.map do |raw|
           ApplicableRange.parse(raw['style'], raw)

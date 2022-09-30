@@ -6,6 +6,14 @@ module DraftjsHtml
       def self.parse(name, raw)
         new(name: name, range: (raw['offset']..(raw['offset'] + raw['length'] - 1)))
       end
+
+      def offset
+        range.begin
+      end
+
+      def length
+        range.size
+      end
     end
   end
 end

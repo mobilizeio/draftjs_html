@@ -35,4 +35,40 @@ RSpec.describe DraftjsHtml::Draftjs do
     expect(entity.mutability).to eq 'MUTABLE'
     expect(entity.data).to eq('url' => 'https://example.com/users/sansa')
   end
+
+  it 'can convert back to a valid raw format' do
+    draftjs = described_class.parse(RawDraftJs.build do
+      text_block '@sansa'
+      inline_style 'BOLD', 0..5
+      apply_entity 'mention', 0..5, key: 'mention-1', mutability: 'MUTABLE', data: {
+        url: 'https://example.com/users/sansa'
+      }
+
+      text_block 'another block'
+    end)
+
+    expect(draftjs.to_raw).to match({
+      'blocks' => [
+        {
+          'text' => '@sansa',
+          'inlineStyleRanges' => [{ 'style' => 'BOLD', 'offset' => 0, 'length' => 6 }],
+          'entityRanges' => [{ 'key' => 'mention-1', 'offset' => 0, 'length' => 6 }],
+          'type' => 'unstyled',
+        },
+        {
+          'text' => 'another block',
+          'inlineStyleRanges' => [],
+          'entityRanges' => [],
+          'type' => 'unstyled',
+        },
+      ],
+      'entityMap' => {
+        'mention-1' => {
+          'type' => 'mention',
+          'mutability' => 'MUTABLE',
+          'data' => { 'url' => 'https://example.com/users/sansa' },
+        }
+      }
+    })
+  end
 end

@@ -6,6 +6,7 @@ require_relative 'draftjs/applicable_range'
 require_relative 'draftjs/block'
 require_relative 'draftjs/entity_map'
 require_relative 'draftjs/entity'
+require_relative 'draftjs/to_raw'
 
 module DraftjsHtml
   module Draftjs

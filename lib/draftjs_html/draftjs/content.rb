@@ -17,6 +17,10 @@ module DraftjsHtml
       def find_entity(key)
         entity_map[key]
       end
+
+      def to_raw
+        ToRaw.new.convert(self)
+      end
     end
   end
 end
