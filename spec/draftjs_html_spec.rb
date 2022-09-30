@@ -248,4 +248,41 @@ RSpec.describe DraftjsHtml do
       <figure><img src="https://example.com/where" alt="An image" class="photography" width="400" height="300"></figure>
     HTML
   end
+
+  it 'supports overriding the built-in style mappings with functions' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'afterward'
+      inline_style 'BOLD', 5..8
+      inline_style 'ITALIC', 5..8
+    end
+
+    html = described_class.to_html(raw_draftjs, options: {
+      inline_style_renderer: ->(style_names, content) {
+        "<b>#{content.upcase} #{style_names.join(',')}</b>"
+      },
+    })
+
+    expect(html).to eq <<~HTML.strip
+      <p>after<b>WARD BOLD,ITALIC</b></p>
+    HTML
+  end
+
+  it 'can fallback to default style rendering for basic styles and use the custom renderer for more complex ones' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'afterward'
+      inline_style 'BOLD', 0..4
+      inline_style 'CUSTOM', 5..8
+    end
+
+    html = described_class.to_html(raw_draftjs, options: {
+      inline_style_renderer: ->(style_names, content) {
+        next unless style_names == ['CUSTOM']
+        "<strong>#{content}</strong>"
+      },
+    })
+
+    expect(html).to eq <<~HTML.strip
+      <p><b>after</b><strong>ward</strong></p>
+    HTML
+  end
 end

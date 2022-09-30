@@ -95,6 +95,9 @@ module DraftjsHtml
     def apply_styles_to(html, style_names, text)
       return html.parent << text if style_names.empty?
 
+      custom_render_content = @options[:inline_style_renderer].call(style_names, text)
+      return html.parent << custom_render_content if custom_render_content
+
       style, *rest = style_names
       html.public_send(style_element_for(style)) do
         apply_styles_to(html, rest, text)
@@ -133,7 +136,8 @@ module DraftjsHtml
     def ensure_options!(opts)
       opts[:entity_style_mappings] = ENTITY_CONVERSION_MAP.merge(opts[:entity_style_mappings] || {}).transform_keys(&:to_s)
       opts[:block_type_mapping] = BLOCK_TYPE_TO_HTML.merge(opts[:block_type_mapping] || {})
-      opts[:inline_style_mapping] = STYLE_MAP.merge(opts[:inline_style_mapping] || {})
+      opts[:inline_style_mapping] = STYLE_MAP.merge(opts[:inline_style_mapping] || {}).transform_keys(&:to_s)
+      opts[:inline_style_renderer] ||= ->(*) { nil }
       opts
     end
   end
