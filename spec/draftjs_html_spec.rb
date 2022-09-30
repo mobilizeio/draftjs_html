@@ -177,9 +177,11 @@ RSpec.describe DraftjsHtml do
     end
 
     html = described_class.to_html(raw_draftjs, options: {
-      style_entity: ->(entity, content) {
-        "<a href=#{entity.data['url']}>#{content}</a>"
-      }
+      entity_style_mappings: {
+        mention: ->(entity, content) {
+          "<a href=#{entity.data['url']}>#{content}</a>"
+        },
+      },
     })
 
     expect(html).to eq <<~HTML.strip
@@ -195,9 +197,11 @@ RSpec.describe DraftjsHtml do
     end
 
     html = described_class.to_html(raw_draftjs, options: {
-      style_entity: ->(entity, content) {
-        "<a href=#{entity.data['url']}>#{content}</a>"
-      }
+      entity_style_mappings: {
+        mention: ->(entity, content) {
+          "<a href=#{entity.data['url']}>#{content}</a>"
+        },
+      },
     })
 
     expect(html).to eq <<~HTML.strip
