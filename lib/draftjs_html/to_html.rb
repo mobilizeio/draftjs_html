@@ -28,10 +28,17 @@ module DraftjsHtml
     DEFAULT_ENTITY_STYLE_FN = ->(_entity, chars) { chars }
     ENTITY_ATTRIBUTE_NAME_MAP = {
       'className' => 'class',
+      'url' => 'href',
     }.freeze
     ENTITY_CONVERSION_MAP = {
       'LINK' => ->(entity, content) {
-        "<a href=#{entity.data['url']}>#{content}</a>"
+        node = Nokogiri::HTML::DocumentFragment.parse('<a>').children.first
+        node.content = content
+        entity.data.slice('url', 'rel', 'target', 'title', 'className').each do |attr, value|
+          node[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
+        end
+
+        node
       },
       'IMAGE' => ->(entity, _content) {
         node = Nokogiri::HTML::DocumentFragment.parse('<img>').children.first

@@ -212,13 +212,19 @@ RSpec.describe DraftjsHtml do
   it 'converts LINK entities to `a` tags' do
     raw_draftjs = RawDraftJs.build do
       text_block "Let's GO"
-      apply_entity 'LINK', 6..7, data: { url: 'https://example.com/collect-200-dollars' }
+      apply_entity 'LINK', 6..7, data: {
+        url: 'https://example.com/collect-200-dollars',
+        rel: 'noreferrer',
+        target: '_blank',
+        title: 'Do not pass go',
+        className: 'legend-of-zelda',
+      }
     end
 
     html = described_class.to_html(raw_draftjs)
 
     expect(html).to eq <<~HTML.strip
-      <p>Let's <a href="https://example.com/collect-200-dollars">GO</a></p>
+      <p>Let's <a href="https://example.com/collect-200-dollars" rel="noreferrer" target="_blank" title="Do not pass go" class="legend-of-zelda">GO</a></p>
     HTML
   end
 
