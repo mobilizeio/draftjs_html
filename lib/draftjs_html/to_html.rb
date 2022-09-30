@@ -13,6 +13,7 @@ module DraftjsHtml
       'code-block' => 'code',
       'ordered-list-item' => 'li',
       'unordered-list-item' => 'li',
+      'atomic' => 'figure',
     }.freeze
     BLOCK_TYPE_TO_HTML_WRAPPER = {
       'code-block' => 'pre',
@@ -23,10 +24,22 @@ module DraftjsHtml
       'BOLD' => 'b',
       'ITALIC' => 'i',
     }.freeze
+
     DEFAULT_ENTITY_STYLE_FN = ->(_entity, chars) { chars }
+    ENTITY_ATTRIBUTE_NAME_MAP = {
+      'className' => 'class',
+    }.freeze
     ENTITY_CONVERSION_MAP = {
       'LINK' => ->(entity, content) {
         "<a href=#{entity.data['url']}>#{content}</a>"
+      },
+      'IMAGE' => ->(entity, _content) {
+        node = Nokogiri::HTML::DocumentFragment.parse('<img>').children.first
+        entity.data.slice('src', 'alt', 'className', 'width', 'height').each do |attr, value|
+          node[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
+        end
+
+        node
       }
     }.freeze
 

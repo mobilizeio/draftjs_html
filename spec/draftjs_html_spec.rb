@@ -221,4 +221,25 @@ RSpec.describe DraftjsHtml do
       <p>Let's <a href="https://example.com/collect-200-dollars">GO</a></p>
     HTML
   end
+
+  it 'converts IMAGE entities to `img` tags' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'Look-y here'
+      block_type 'atomic', ' '
+      apply_entity 'IMAGE', 0..1, data: {
+        src: 'https://example.com/where',
+        width: 400,
+        height: 300,
+        alt: 'An image',
+        className: 'photography'
+      }
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq <<~HTML.strip
+      <p>Look-y here</p>
+      <figure><img src="https://example.com/where" alt="An image" class="photography" width="400" height="300"></figure>
+    HTML
+  end
 end
