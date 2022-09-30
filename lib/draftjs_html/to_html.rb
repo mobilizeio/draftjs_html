@@ -23,6 +23,12 @@ module DraftjsHtml
       'BOLD' => 'b',
       'ITALIC' => 'i',
     }.freeze
+    DEFAULT_ENTITY_STYLE_FN = ->(_entity, chars) { chars }
+    ENTITY_CONVERSION_MAP = {
+      'LINK' => ->(entity, content) {
+        "<a href=#{entity.data['url']}>#{content}</a>"
+      }
+    }.freeze
 
     def initialize(options)
       @document = Nokogiri::HTML::Builder.new
@@ -86,7 +92,7 @@ module DraftjsHtml
     def try_apply_entity_to(draftjs, char_range)
       entity = draftjs.find_entity(char_range.entity_key)
       content = char_range.text
-      content = @options[:entity_style_mappings][entity.type].call(entity, content) if entity
+      content = (@options[:entity_style_mappings][entity.type] || DEFAULT_ENTITY_STYLE_FN).call(entity, content) if entity
       content
     end
 
@@ -105,8 +111,7 @@ module DraftjsHtml
     end
 
     def ensure_options!(opts)
-      opts[:entity_style_mappings] ||= Hash.new { |h, k| h[k.to_s] = ->(_entity, chars) { chars } }
-      opts[:entity_style_mappings].transform_keys!(&:to_s)
+      opts[:entity_style_mappings] = ENTITY_CONVERSION_MAP.merge(opts[:entity_style_mappings] || {}).transform_keys(&:to_s)
       opts[:block_type_mapping] = BLOCK_TYPE_TO_HTML.merge(opts[:block_type_mapping] || {})
       opts[:inline_style_mapping] = STYLE_MAP.merge(opts[:inline_style_mapping] || {})
       opts
