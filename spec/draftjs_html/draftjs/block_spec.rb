@@ -100,4 +100,30 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
       { text: ' coming', style_names: [], entity_key: nil },
     ]
   end
+
+  it 'can apply a new style name to a given char range' do
+    raw = RawDraftJs.build do
+      text_block 'Winter is coming'
+    end
+    block = described_class.parse(raw.dig('blocks', 0))
+
+    block.add_style 'BOLD', 7..8
+
+    expect(block.each_char.to_a[7..8].map(&:style_names)).to eq [
+      ['BOLD'], ['BOLD']
+    ]
+  end
+
+  it 'can apply a new style name to a given char range' do
+    raw = RawDraftJs.build do
+      text_block 'Winter is coming'
+    end
+    block = described_class.parse(raw.dig('blocks', 0))
+
+    block.add_style 'BOLD', 7..8
+
+    expect(block.each_char.to_a[7..8].map(&:style_names)).to eq [
+      ['BOLD'], ['BOLD']
+    ]
+  end
 end

@@ -64,6 +64,10 @@ module DraftjsHtml
           ApplicableRange.parse(raw['key'], raw)
         end
       end
+
+      def add_style(name, range)
+        inline_styles << ApplicableRange.new(name: name, range: range)
+      end
     end
   end
 end
