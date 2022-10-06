@@ -47,6 +47,16 @@ RSpec.describe DraftjsHtml do
     expect(html).to eq "<p>❄️ is coming</p>"
   end
 
+  it 'does not allow for HTML injection from plaintext' do
+    raw_draftjs = RawDraftJs.build do
+      text_block '<p>this should render with entities</p>'
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq "<p>&lt;p&gt;this should render with entities&lt;/p&gt;</p>"
+  end
+
   it 'renders the various block types as their appropriate HTML elements' do
     raw_draftjs = RawDraftJs.build do
       block_type 'unstyled', 'plain text'
@@ -199,8 +209,11 @@ RSpec.describe DraftjsHtml do
 
     html = described_class.to_html(raw_draftjs, options: {
       entity_style_mappings: {
-        mention: ->(entity, content) {
-          "<a href=#{entity.data['url']}>#{content}</a>"
+        mention: ->(entity, content, document) {
+          Nokogiri::XML::Node.new("a", document).tap do |node|
+            node.content = content
+            node[:href] = entity.data['url']
+          end
         },
       },
     })
@@ -219,8 +232,11 @@ RSpec.describe DraftjsHtml do
 
     html = described_class.to_html(raw_draftjs, options: {
       entity_style_mappings: {
-        mention: ->(entity, content) {
-          "<a href=#{entity.data['url']}>#{content}</a>"
+        mention: ->(entity, content, document) {
+          Nokogiri::XML::Node.new("a", document).tap do |node|
+            node.content = content
+            node[:href] = entity.data['url']
+          end
         },
       },
     })
@@ -278,13 +294,32 @@ RSpec.describe DraftjsHtml do
     end
 
     html = described_class.to_html(raw_draftjs, options: {
-      inline_style_renderer: ->(style_names, content) {
-        "<b>#{content.upcase} #{style_names.join(',')}</b>"
+      inline_style_renderer: ->(style_names, content, document) {
+        Nokogiri::XML::Node.new("b", document).tap do |node|
+          node.content = "#{content.upcase} #{style_names.join(',')}"
+        end
       },
     })
 
     expect(html).to eq <<~HTML.strip
       <p>after<b>WARD BOLD,ITALIC</b></p>
+    HTML
+  end
+
+  it 'protects against HTML injection with custom inline-style rendering' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'after<p>bold</p>'
+      inline_style 'BOLD', 5..
+    end
+
+    html = described_class.to_html(raw_draftjs, options: {
+      inline_style_renderer: ->(_style_names, content, _document) {
+        "<b>#{content}</b>"
+      },
+    })
+
+    expect(html).to eq <<~HTML.strip
+      <p>after&lt;b&gt;&lt;p&gt;bold&lt;/p&gt;&lt;/b&gt;</p>
     HTML
   end
 
@@ -296,9 +331,11 @@ RSpec.describe DraftjsHtml do
     end
 
     html = described_class.to_html(raw_draftjs, options: {
-      inline_style_renderer: ->(style_names, content) {
+      inline_style_renderer: ->(style_names, content, document) {
         next unless style_names == ['CUSTOM']
-        "<strong>#{content}</strong>"
+        Nokogiri::XML::Node.new("strong", document).tap do |node|
+          node.content = content
+        end
       },
     })
 

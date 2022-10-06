@@ -59,8 +59,11 @@ raw_draftjs = {
 
 DraftjsHtml.to_html(raw_draftjs, options: {
   entity_style_mappings:  {
-    abc: ->(entity, content) {
-      %Q{<a href="https://example.com/?id=#{entity.data['user_id']}">#{content}</a>}
+    abc: ->(entity, content, document) {
+      Nokogiri::XML::Node.new('a', document).tap do |node|
+        node['href'] = "https://example.com/?id=#{entity.data['user_id']}"
+        node.content = content
+      end
     },
   },
 }) # => <p>Hello <a href="https://example.com/?id=123">@Arya</a></p>
@@ -81,8 +84,8 @@ Defaults to `UTF-8`.
 
 Allows the author to specify special mapping functions for entities.
 By default, we render `LINK` and `IMAGE` entities using the standard `<a>` and `<img>` tags, respectively.
-The author may supply a Proc object that returns any object Nokogiri can consume for adding to HTML.
-This includes `String`, `Nokogiri::Document::Fragment`, and `Nokogiri::Document` objects.
+The author may supply a `call`-able object that returns a `Nokogiri::XML::Node` (or similar).
+If returned a String, it's assumed this content is plaintext (or otherwise unsafe) and its content will be coerced to plaintext.
 
 #### `:block_type_mapping`
 
@@ -128,7 +131,9 @@ However, if you "return" `nil` (or `false-y`) from the proc, it will fallback to
 DraftjsHtml.to_html(raw_draftjs, options: {
   inline_style_renderer: ->(style_names, content) {
     next if style_names != ['CUSTOM']
-    "<pre>#{content}</pre>"
+    Nokogiri::XML::Node.new('pre', document).tap do |node|
+      node.content = content
+    end
   },
 })
 

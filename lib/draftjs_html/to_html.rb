@@ -27,14 +27,14 @@ module DraftjsHtml
       'UNDERLINE' => 'u',
     }.freeze
 
-    DEFAULT_ENTITY_STYLE_FN = ->(_entity, chars) { chars }
+    DEFAULT_ENTITY_STYLE_FN = ->(_entity, chars, _doc) { chars }
     ENTITY_ATTRIBUTE_NAME_MAP = {
       'className' => 'class',
       'url' => 'href',
     }.freeze
     ENTITY_CONVERSION_MAP = {
-      'LINK' => ->(entity, content) {
-        node = Nokogiri::HTML::DocumentFragment.parse('<a>').children.first
+      'LINK' => ->(entity, content, document) {
+        node = Nokogiri::XML::Node.new('a', document)
         node.content = content
         entity.data.slice('url', 'rel', 'target', 'title', 'className').each do |attr, value|
           node[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
@@ -42,8 +42,8 @@ module DraftjsHtml
 
         node
       },
-      'IMAGE' => ->(entity, _content) {
-        node = Nokogiri::HTML::DocumentFragment.parse('<img>').children.first
+      'IMAGE' => ->(entity, _content, document) {
+        node = Nokogiri::XML::Node.new('img', document)
         entity.data.slice('src', 'alt', 'className', 'width', 'height').each do |attr, value|
           node[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
         end
@@ -94,15 +94,23 @@ module DraftjsHtml
       end
     end
 
-    def apply_styles_to(html, style_names, text)
-      return html.parent << text if style_names.empty?
+    def apply_styles_to(html, style_names, child)
+      return append_child(html, child) if style_names.empty?
 
-      custom_render_content = @options[:inline_style_renderer].call(style_names, text)
-      return html.parent << custom_render_content if custom_render_content
+      custom_render_content = @options[:inline_style_renderer].call(style_names, child, @document.parent)
+      return append_child(html, custom_render_content) if custom_render_content
 
       style, *rest = style_names
-      html.public_send(style_element_for(style)) do
-        apply_styles_to(html, rest, text)
+      html.public_send(style_element_for(style)) do |builder|
+        apply_styles_to(builder, rest, child)
+      end
+    end
+
+    def append_child(nokogiri, child)
+      if child.is_a?(Nokogiri::XML::Node)
+        nokogiri.parent.add_child(child)
+      else
+        nokogiri.parent.add_child(Nokogiri::XML::Text.new(child, @document.parent))
       end
     end
 
@@ -119,7 +127,11 @@ module DraftjsHtml
     def try_apply_entity_to(draftjs, char_range)
       entity = draftjs.find_entity(char_range.entity_key)
       content = char_range.text
-      content = (@options[:entity_style_mappings][entity.type] || DEFAULT_ENTITY_STYLE_FN).call(entity, content) if entity
+      if entity
+        style_fn = (@options[:entity_style_mappings][entity.type] || DEFAULT_ENTITY_STYLE_FN)
+        content = style_fn.call(entity, content, @document.parent)
+      end
+
       content
     end
 
