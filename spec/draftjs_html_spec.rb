@@ -37,6 +37,16 @@ RSpec.describe DraftjsHtml do
     expect(html).to eq "<p>Gimme a</p>\n<br>"
   end
 
+  it 'does not mangle text with special characters' do
+    raw_draftjs = RawDraftJs.build do
+      text_block '❄️ is coming'
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq "<p>❄️ is coming</p>"
+  end
+
   it 'renders the various block types as their appropriate HTML elements' do
     raw_draftjs = RawDraftJs.build do
       block_type 'unstyled', 'plain text'

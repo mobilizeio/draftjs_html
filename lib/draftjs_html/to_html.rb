@@ -53,8 +53,8 @@ module DraftjsHtml
     }.freeze
 
     def initialize(options)
-      @document = Nokogiri::HTML::Builder.new
       @options = ensure_options!(options)
+      @document = Nokogiri::HTML::Builder.new(encoding: @options.fetch(:encoding, 'UTF-8'))
     end
 
     def convert(raw_draftjs)
