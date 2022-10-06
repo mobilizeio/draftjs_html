@@ -59,11 +59,11 @@ raw_draftjs = {
 
 DraftjsHtml.to_html(raw_draftjs, {
   entity_style_mappings:  {
-    link: ->(entity, content) {
-      %Q{<a href="#{entity.data['url']}">#{content}</a>}
+    abc: ->(entity, content) {
+      %Q{<a href="https://example.com/?id=#{entity.data['user_id']}">#{content}</a>}
     },
   },
-}) # => <p>Hello </p>
+}) # => <p>Hello <a href="https://example.com/?id=123">@Arya</a></p>
 ```
 
 Almost all of the options support Procs (or otherwise `.call`-ables) to provide
