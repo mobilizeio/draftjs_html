@@ -107,6 +107,8 @@ module DraftjsHtml
     end
 
     def block_element_for(block)
+      return 'br' if block.blank?
+
       @options[:block_type_mapping].fetch(block.type)
     end
 

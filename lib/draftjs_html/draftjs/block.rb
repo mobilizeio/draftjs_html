@@ -17,6 +17,10 @@ module DraftjsHtml
         text.length
       end
 
+      def blank?
+        text.empty? && entity_ranges.empty?
+      end
+
       def each_char
         return to_enum(:each_char) unless block_given?
 

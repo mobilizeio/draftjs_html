@@ -26,6 +26,17 @@ RSpec.describe DraftjsHtml do
     expect(html).to eq "<p>Hello world!</p>\n<p>Winter is coming.</p>"
   end
 
+  it 'generates <br/> tags for unstyled, empty blocks' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'Gimme a'
+      text_block ''
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq "<p>Gimme a</p>\n<br>"
+  end
+
   it 'renders the various block types as their appropriate HTML elements' do
     raw_draftjs = RawDraftJs.build do
       block_type 'unstyled', 'plain text'
