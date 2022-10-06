@@ -37,6 +37,16 @@ RSpec.describe DraftjsHtml do
     expect(html).to eq "<p>Gimme a</p>\n<br>"
   end
 
+  it 'generates <br/> tags for explicit newline characters between text' do
+    raw_draftjs = RawDraftJs.build do
+      text_block "Gimme a\nGimme a\n"
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq "<p>Gimme a<br>Gimme a</p>"
+  end
+
   it 'does not mangle text with special characters' do
     raw_draftjs = RawDraftJs.build do
       text_block '❄️ is coming'
