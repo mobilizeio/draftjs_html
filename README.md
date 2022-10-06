@@ -59,11 +59,8 @@ raw_draftjs = {
 
 DraftjsHtml.to_html(raw_draftjs, options: {
   entity_style_mappings:  {
-    abc: ->(entity, content, document) {
-      Nokogiri::XML::Node.new('a', document).tap do |node|
-        node['href'] = "https://example.com/?id=#{entity.data['user_id']}"
-        node.content = content
-      end
+    abc: ->(entity, content, *) {
+      DraftjsHtml::Node.new('a', { href: "https://example.com/?id=#{entity.data['user_id']}" }, content)
     },
   },
 }) # => <p>Hello <a href="https://example.com/?id=123">@Arya</a></p>
@@ -84,8 +81,9 @@ Defaults to `UTF-8`.
 
 Allows the author to specify special mapping functions for entities.
 By default, we render `LINK` and `IMAGE` entities using the standard `<a>` and `<img>` tags, respectively.
-The author may supply a `call`-able object that returns a `Nokogiri::XML::Node` (or similar).
+The author may supply a `call`-able object that returns a `DraftjsHtml::Node`-able (or similar).
 If returned a String, it's assumed this content is plaintext (or otherwise unsafe) and its content will be coerced to plaintext.
+See the section on HTML Injection protection for more details.
 
 #### `:block_type_mapping`
 
@@ -138,6 +136,35 @@ DraftjsHtml.to_html(raw_draftjs, options: {
 })
 
 # This would use the default inline style rendering UNLESS the *only* applied style for this range was "CUSTOM"
+```
+
+#### HTML Injection protection
+
+Working with user-generated content can be a dangerous thing.
+While it allows for a lot of flexibility, it also creates some potential attack vectors that you need to be aware of.
+We try to take a "safe by default" stance with this library, and not generate HTML that could be dangerous when we know better.
+
+To facilitate this, we require a little work from you, dear programmer.
+Namely, when specifying special algorithms for generating entities or inline styles, you need to help us keep you safe.
+You can do this by returning a `Nokogiri::XML::Node` or `DraftjsHtml::Node` from any functions you provide that generate HTML.
+This is similar to Ruby on Rails' `#to_html` method, but rather than a monkeypatch, we chose to provide a "marker class" (classes) that we know are safe.
+These classes will handle escaping, encoding, and otherwise "safe generation" for you.
+If you, on the other hand, return a bare `String` from one of the custom render functions, we assume it's _unsafe_ and encode it.
+
+That is, a function like this:
+```ruby
+->(entity, content, document) do
+  "<p>hi!</p>"
+end
+# will become an HTML-entity escaped string (e.g. "&lt;p&gt;hi!&lt;/p&gt;")
+```
+
+Where, a function like this:
+```ruby
+->(entity, content, document) do
+  DraftjsHtml::Node.new('p', {}, 'hi!')
+end
+# will nest HTML nodes as you probably want (e.g. "<p>hi!</p>")
 ```
 
 ## Development

@@ -1,3 +1,5 @@
+require_relative 'node'
+
 module DraftjsHtml
   class ToHtml
     BLOCK_TYPE_TO_HTML = {
@@ -33,22 +35,19 @@ module DraftjsHtml
       'url' => 'href',
     }.freeze
     ENTITY_CONVERSION_MAP = {
-      'LINK' => ->(entity, content, document) {
-        node = Nokogiri::XML::Node.new('a', document)
-        node.content = content
-        entity.data.slice('url', 'rel', 'target', 'title', 'className').each do |attr, value|
-          node[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
+      'LINK' => ->(entity, content, *) {
+        attributes = entity.data.slice('url', 'rel', 'target', 'title', 'className').each_with_object({}) do |(attr, value), h|
+          h[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
         end
 
-        node
+        DraftjsHtml::Node.new('a', attributes, content)
       },
-      'IMAGE' => ->(entity, _content, document) {
-        node = Nokogiri::XML::Node.new('img', document)
-        entity.data.slice('src', 'alt', 'className', 'width', 'height').each do |attr, value|
-          node[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
+      'IMAGE' => ->(entity, *) {
+        attributes = entity.data.slice('src', 'alt', 'className', 'width', 'height').each_with_object({}) do |(attr, value), h|
+          h[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
         end
 
-        node
+        DraftjsHtml::Node.new('img', attributes)
       }
     }.freeze
 
@@ -107,11 +106,7 @@ module DraftjsHtml
     end
 
     def append_child(nokogiri, child)
-      if child.is_a?(Nokogiri::XML::Node)
-        nokogiri.parent.add_child(child)
-      else
-        nokogiri.parent.add_child(Nokogiri::XML::Text.new(child, @document.parent))
-      end
+      nokogiri.parent.add_child(DraftjsHtml::Node.of(child).to_nokogiri(@document.parent))
     end
 
     def block_element_for(block)

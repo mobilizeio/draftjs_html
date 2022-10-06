@@ -209,11 +209,8 @@ RSpec.describe DraftjsHtml do
 
     html = described_class.to_html(raw_draftjs, options: {
       entity_style_mappings: {
-        mention: ->(entity, content, document) {
-          Nokogiri::XML::Node.new("a", document).tap do |node|
-            node.content = content
-            node[:href] = entity.data['url']
-          end
+        mention: ->(entity, content, *) {
+          DraftjsHtml::Node.new('a', { href: entity.data['url'] }, content)
         },
       },
     })
