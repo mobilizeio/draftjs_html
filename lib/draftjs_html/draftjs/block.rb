@@ -65,7 +65,7 @@ module DraftjsHtml
 
       def entity_ranges
         @entity_ranges ||= raw_entity_ranges.map do |raw|
-          ApplicableRange.parse(raw['key'], raw)
+          ApplicableRange.parse(raw['key'].to_s, raw)
         end
       end
 

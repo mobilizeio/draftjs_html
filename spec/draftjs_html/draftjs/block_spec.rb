@@ -126,4 +126,20 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
       ['BOLD'], ['BOLD']
     ]
   end
+
+  it 'converts raw_entity_range `key` values to strings' do
+    raw = RawDraftJs.build do
+      text_block 'Winter is coming'
+      entity_range 0, 7..8
+    end
+    block = described_class.parse(raw.dig('blocks', 0))
+
+    expect(block.each_char.to_a.map(&:entity_key)).to eq [
+      nil, nil, nil, nil, nil, nil,
+      nil,
+      '0', '0',
+      nil,
+      nil, nil, nil, nil, nil, nil,
+    ]
+  end
 end
