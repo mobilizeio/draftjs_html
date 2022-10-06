@@ -57,7 +57,7 @@ raw_draftjs = {
   },
 }
 
-DraftjsHtml.to_html(raw_draftjs, {
+DraftjsHtml.to_html(raw_draftjs, options: {
   entity_style_mappings:  {
     abc: ->(entity, content) {
       %Q{<a href="https://example.com/?id=#{entity.data['user_id']}">#{content}</a>}
@@ -69,6 +69,71 @@ DraftjsHtml.to_html(raw_draftjs, {
 Almost all of the options support Procs (or otherwise `.call`-ables) to provide
 flexibility in the conversion process. As the library uses Nokogiri to generate
 HTML, it's also possible to return `Nokogiri::Node` objects or String objects.
+
+### ToHtml Options
+
+#### `:encoding`
+
+Specify the HTML generation encoding.
+Defaults to `UTF-8`.
+
+#### `:entity_style_mappings`
+
+Allows the author to specify special mapping functions for entities.
+By default, we render `LINK` and `IMAGE` entities using the standard `<a>` and `<img>` tags, respectively.
+The author may supply a Proc object that returns any object Nokogiri can consume for adding to HTML.
+This includes `String`, `Nokogiri::Document::Fragment`, and `Nokogiri::Document` objects.
+
+#### `:block_type_mapping`
+
+You may wish to override the default HTML tags used for DraftJS block types.
+By default, we convert block types to tags as defined by `DraftjsHtml::ToHtml::BLOCK_TYPE_TO_HTML`.
+These may be overridden and appended to, like so:
+
+```ruby
+DraftjsHtml.to_html(raw_draftjs, options: {
+  block_type_mapping: {
+    'unstyled' => 'span',
+  },
+})
+
+# This would generate <span> tags instead of <p> tags for "unstyled" DraftJS blocks.
+```
+
+#### `:inline_style_mapping`
+
+You may wish to override the default HTML tags used to render DraftJS `inlineStyleRanges`.
+This works very similarly to `:block_type_mapping`, and the tags are defined by `DraftjsHtml::ToHtml::STYLE_MAP`.
+These may be overridden and appended to, like so:
+
+```ruby
+DraftjsHtml.to_html(raw_draftjs, options: {
+  inline_style_mapping: {
+    'BOLD' => 'strong',
+  },
+})
+
+# This would generate <strong> tags instead of <b> tags around ranges of `BOLD` inline styles.
+```
+
+#### `:inline_style_renderer`
+
+If the direct mapping from `:inline_style_mapping` isn't enough, you can supply a custom function for rendering a style range.
+This function, when provided, will be called with all applicable styles for a range, and the relevant content/text for that range.
+It bears stressing that this `#call`-able will be called with *all* defined styles for the content/character range.
+This means that by declaring this function, you take responsibility for handling _all_ styles for that range.
+However, if you "return" `nil` (or `false-y`) from the proc, it will fallback to the standard "mapping" fucntionality.
+
+```ruby
+DraftjsHtml.to_html(raw_draftjs, options: {
+  inline_style_renderer: ->(style_names, content) {
+    next if style_names != ['CUSTOM']
+    "<pre>#{content}</pre>"
+  },
+})
+
+# This would use the default inline style rendering UNLESS the *only* applied style for this range was "CUSTOM"
+```
 
 ## Development
 
