@@ -106,7 +106,7 @@ module DraftjsHtml
     end
 
     def append_child(nokogiri, child)
-      nokogiri.parent.add_child(DraftjsHtml::Node.of(child).to_nokogiri(@document.parent))
+      nokogiri.parent.add_child(DraftjsHtml::Node.of(child).to_nokogiri(@document.doc))
     end
 
     def block_element_for(block)
