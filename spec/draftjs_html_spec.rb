@@ -47,6 +47,20 @@ RSpec.describe DraftjsHtml do
     expect(html).to eq "<p>Gimme a<br>Gimme a</p>"
   end
 
+  it 'allows squeezing/compacting/collapsing newlines' do
+    raw_draftjs = RawDraftJs.build do
+      text_block "Winter\n\nis coming"
+    end
+
+    html = described_class.to_html(raw_draftjs, options: {
+      squeeze_newlines: true,
+    })
+
+    expect(html).to eq <<~HTML.strip
+      <p>Winter<br>is coming</p>
+    HTML
+  end
+
   it 'does not mangle text with special characters' do
     raw_draftjs = RawDraftJs.build do
       text_block '❄️ is coming'

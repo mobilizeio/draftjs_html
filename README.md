@@ -77,6 +77,17 @@ HTML, it's also possible to return `Nokogiri::Node` objects or String objects.
 Specify the HTML generation encoding.
 Defaults to `UTF-8`.
 
+#### `squeeze_newlines`
+
+Often times, we'll get text in our blocks that will generate unexpected HTML.
+Most of this is caused by whitespace.
+You can use the `squeeze_newlines` option to collapse consecutive newline/CRLF characters to one, resulting in a single `<br>` tag.
+Defaults to `false`.
+
+```ruby
+
+```
+
 #### `:entity_style_mappings`
 
 Allows the author to specify special mapping functions for entities.
@@ -93,12 +104,11 @@ These may be overridden and appended to, like so:
 
 ```ruby
 DraftjsHtml.to_html(raw_draftjs, options: {
-  block_type_mapping: {
-    'unstyled' => 'span',
-  },
+  squeeze_newlines: true,
 })
 
-# This would generate <span> tags instead of <p> tags for "unstyled" DraftJS blocks.
+# Given a DraftJS block like: `{ text: 'Hi!\n\n\nWelcome to Westeros!\n\n\n'}`
+# This would generate `<p>Hi!<br>Welcome to Westeros!<br></p>`
 ```
 
 #### `:inline_style_mapping`

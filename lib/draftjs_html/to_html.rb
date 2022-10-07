@@ -68,6 +68,7 @@ module DraftjsHtml
 
             body.public_send(block_element_for(block)) do |block_body|
               block.each_range do |char_range|
+                squeeze_newlines(char_range)
                 content = try_apply_entity_to(draftjs, char_range)
 
                 apply_styles_to(block_body, char_range.style_names, Node.of(content))
@@ -81,6 +82,10 @@ module DraftjsHtml
     end
 
     private
+
+    def squeeze_newlines(char_range)
+      char_range.text = @options[:newline_squeezer].call(char_range.text)
+    end
 
     def ensure_nesting_depth(block, body)
       new_wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
@@ -147,6 +152,7 @@ module DraftjsHtml
     def ensure_options!(opts)
       opts[:entity_style_mappings] = ENTITY_CONVERSION_MAP.merge(opts[:entity_style_mappings] || {}).transform_keys(&:to_s)
       opts[:block_type_mapping] = BLOCK_TYPE_TO_HTML.merge(opts[:block_type_mapping] || {})
+      opts[:newline_squeezer] = opts[:squeeze_newlines] ? ->(text) { text.gsub(/(\n|\r\n)+/, "\n") } : ->(text) { text }
       opts[:inline_style_mapping] = STYLE_MAP.merge(opts[:inline_style_mapping] || {}).transform_keys(&:to_s)
       opts[:inline_style_renderer] ||= ->(*) { nil }
       opts
