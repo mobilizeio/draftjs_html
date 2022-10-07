@@ -3,6 +3,14 @@ module DraftjsHtml
     def to_nokogiri(_document)
       node
     end
+
+    def wrap(tagname, attrs = {})
+      Node.new(tagname, attrs, self)
+    end
+
+    def to_s
+      node.to_s
+    end
   end
 
   StringNode = Struct.new(:raw) do
@@ -15,6 +23,14 @@ module DraftjsHtml
       end
 
       Nokogiri::XML::NodeSet.new(document, text_nodes)
+    end
+
+    def wrap(tagname, attrs = {})
+      Node.new(tagname, attrs, self)
+    end
+
+    def to_s
+      raw.to_s
     end
   end
 
@@ -30,9 +46,17 @@ module DraftjsHtml
 
     def to_nokogiri(document)
       Nokogiri::XML::Node.new(element_name, document).tap do |node|
-        node.content = content
+        node << content.to_nokogiri(document) if content
         (attributes || {}).each { |k, v| node[k] = v }
       end
+    end
+
+    def wrap(tagname, attrs = {})
+      Node.new(tagname, attrs, self)
+    end
+
+    def to_s
+      content.to_s
     end
   end
 end

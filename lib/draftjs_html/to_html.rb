@@ -70,7 +70,7 @@ module DraftjsHtml
               block.each_range do |char_range|
                 content = try_apply_entity_to(draftjs, char_range)
 
-                apply_styles_to(block_body, char_range.style_names, content)
+                apply_styles_to(block_body, char_range.style_names, Node.of(content))
               end
             end
           end
@@ -124,7 +124,7 @@ module DraftjsHtml
       content = char_range.text
       if entity
         style_fn = (@options[:entity_style_mappings][entity.type] || DEFAULT_ENTITY_STYLE_FN)
-        content = style_fn.call(entity, content, @document.parent)
+        content = style_fn.call(entity, Node.of(content), @document.parent)
       end
 
       content

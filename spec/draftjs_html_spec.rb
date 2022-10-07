@@ -239,11 +239,8 @@ RSpec.describe DraftjsHtml do
 
     html = described_class.to_html(raw_draftjs, options: {
       entity_style_mappings: {
-        mention: ->(entity, content, document) {
-          Nokogiri::XML::Node.new("a", document).tap do |node|
-            node.content = content
-            node[:href] = entity.data['url']
-          end
+        mention: ->(entity, content, *) {
+          content.wrap('a', { href: entity.data['url'] })
         },
       },
     })
@@ -303,7 +300,7 @@ RSpec.describe DraftjsHtml do
     html = described_class.to_html(raw_draftjs, options: {
       inline_style_renderer: ->(style_names, content, document) {
         Nokogiri::XML::Node.new("b", document).tap do |node|
-          node.content = "#{content.upcase} #{style_names.join(',')}"
+          node.content = "#{content.to_s.upcase} #{style_names.join(',')}"
         end
       },
     })
@@ -338,16 +335,37 @@ RSpec.describe DraftjsHtml do
     end
 
     html = described_class.to_html(raw_draftjs, options: {
-      inline_style_renderer: ->(style_names, content, document) {
+      inline_style_renderer: ->(style_names, content, *) {
         next unless style_names == ['CUSTOM']
-        Nokogiri::XML::Node.new("strong", document).tap do |node|
-          node.content = content
-        end
+        content.wrap('strong')
       },
     })
 
     expect(html).to eq <<~HTML.strip
       <p><b>after</b><strong>ward</strong></p>
+    HTML
+  end
+
+  it 'can style inline ranges and entities at the same time' do
+    raw_draftjs = RawDraftJs.build do
+      text_block 'Come visit #Westeros!'
+      inline_style 'BOLD', 11..22
+      apply_entity 'LINK', 11..22, data: { url: 'https://westeros.example.com' }
+    end
+
+    html = described_class.to_html(raw_draftjs, options: {
+      entity_style_mappings: {
+        'LINK' => ->(entity, content, *) {
+          content.wrap('a', { href: entity.data['url'] })
+        },
+      },
+      inline_style_renderer: ->(_styles, content, *) {
+        content.wrap('b')
+      }
+    })
+
+    expect(html).to eq <<~HTML.strip
+      <p>Come visit <b><a href="https://westeros.example.com">#Westeros!</a></b></p>
     HTML
   end
 end
