@@ -2,12 +2,13 @@
 
 module DraftjsHtml
   module Draftjs
-    Block = Struct.new(:key, :text, :type, :inline_style_ranges, :raw_entity_ranges, keyword_init: true) do
+    Block = Struct.new(:key, :text, :type, :depth, :inline_style_ranges, :raw_entity_ranges, keyword_init: true) do
       def self.parse(raw)
         new(
           key: raw['key'],
           text: raw['text'],
           type: raw['type'],
+          depth: raw['depth'],
           inline_style_ranges: Array(raw['inlineStyleRanges']),
           raw_entity_ranges: Array(raw['entityRanges']),
         )
