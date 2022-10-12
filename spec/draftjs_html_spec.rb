@@ -47,6 +47,31 @@ RSpec.describe DraftjsHtml do
     expect(html).to eq "<p>Gimme a<br>Gimme a</p>"
   end
 
+  it 'keeps <br> tags at the beginning of a style range within a block' do
+    raw_draftjs = RawDraftJs.build do
+      text_block "There is only one thing we say to death:\n\nNot today."
+      inline_style 'BOLD', 42..51
+    end
+
+    result = described_class.to_html(raw_draftjs, options: {
+      squeeze_newlines: true,
+    })
+
+    expect(result).to eq '<p>There is only one thing we say to death:<br><b>Not today.</b></p>'
+  end
+
+  it 'chomps explicit newlines from the end of a block' do
+    raw_draftjs = RawDraftJs.build do
+      text_block "Valar Morghulis\n"
+    end
+
+    result = described_class.to_html(raw_draftjs, options: {
+      squeeze_newlines: true,
+    })
+
+    expect(result).to eq '<p>Valar Morghulis</p>'
+  end
+
   it 'allows squeezing/compacting/collapsing newlines' do
     raw_draftjs = RawDraftJs.build do
       text_block "Winter\n\nis coming"

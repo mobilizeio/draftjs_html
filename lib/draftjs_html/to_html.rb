@@ -39,7 +39,7 @@ module DraftjsHtml
     private
 
     def squeeze_newlines(char_range)
-      char_range.text = @options[:newline_squeezer].call(char_range.text)
+      char_range.text = @options[:newline_squeezer].call(char_range.text.chomp)
     end
 
     def apply_styles_to(html, style_names, child)
