@@ -54,6 +54,7 @@ module DraftjsHtml
     def initialize(options)
       @options = ensure_options!(options)
       @document = Nokogiri::HTML::Builder.new(encoding: @options.fetch(:encoding, 'UTF-8'))
+      @current_depth = 0
     end
 
     def convert(raw_draftjs)
@@ -61,7 +62,7 @@ module DraftjsHtml
 
       @document.html do |html|
         html.body do |body|
-          @previous_parent = body.parent
+          @previous_parents = [body.parent]
 
           draftjs.blocks.each do |block|
             ensure_nesting_depth(block, body)
@@ -89,12 +90,18 @@ module DraftjsHtml
 
     def ensure_nesting_depth(block, body)
       new_wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
-      if body.parent.name != new_wrapper_tag
-        if new_wrapper_tag
+      if body.parent.name != new_wrapper_tag || block.depth != @current_depth
+        if @current_depth < block.depth
+          push_depth(body, new_wrapper_tag)
+        elsif @current_depth > block.depth
+          pop_depth(body, times: @current_depth - block.depth)
+          pop_nesting(body) unless new_wrapper_tag
+        elsif new_wrapper_tag
           push_nesting(body, new_wrapper_tag)
-        else
+        elsif @previous_parents.size > 1
           pop_nesting(body)
         end
+        @current_depth = block.depth
       end
     end
 
@@ -135,14 +142,27 @@ module DraftjsHtml
       content
     end
 
+    def push_depth(builder, tagname)
+      @previous_parents << builder.parent
+      builder.parent = builder.parent.last_element_child
+      push_nesting(builder, tagname)
+    end
+
     def push_nesting(builder, tagname)
       node = create_child(builder, tagname)
-      @previous_parent = builder.parent
+      @previous_parents << builder.parent
       builder.parent = node
     end
 
+    def pop_depth(builder, times:)
+      times.times do
+        pop_nesting(builder)
+        pop_nesting(builder)
+      end
+    end
+
     def pop_nesting(builder)
-      builder.parent = @previous_parent
+      builder.parent = @previous_parents.pop
     end
 
     def create_child(builder, tagname)
