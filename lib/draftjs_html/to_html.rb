@@ -1,4 +1,5 @@
 require_relative 'node'
+require_relative 'html_depth'
 
 module DraftjsHtml
   class ToHtml
@@ -16,11 +17,6 @@ module DraftjsHtml
       'ordered-list-item' => 'li',
       'unordered-list-item' => 'li',
       'atomic' => 'figure',
-    }.freeze
-    BLOCK_TYPE_TO_HTML_WRAPPER = {
-      'code-block' => 'pre',
-      'ordered-list-item' => 'ol',
-      'unordered-list-item' => 'ul',
     }.freeze
     STYLE_MAP = {
       'BOLD' => 'b',
@@ -54,7 +50,7 @@ module DraftjsHtml
     def initialize(options)
       @options = ensure_options!(options)
       @document = Nokogiri::HTML::Builder.new(encoding: @options.fetch(:encoding, 'UTF-8'))
-      @current_depth = 0
+      @html_depth = HtmlDepth.new(@document)
     end
 
     def convert(raw_draftjs)
@@ -65,7 +61,7 @@ module DraftjsHtml
           @previous_parents = [body.parent]
 
           draftjs.blocks.each do |block|
-            ensure_nesting_depth(block, body)
+            @html_depth.apply(block)
 
             body.public_send(block_element_for(block)) do |block_body|
               block.each_range do |char_range|
@@ -86,23 +82,6 @@ module DraftjsHtml
 
     def squeeze_newlines(char_range)
       char_range.text = @options[:newline_squeezer].call(char_range.text)
-    end
-
-    def ensure_nesting_depth(block, body)
-      new_wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
-      if body.parent.name != new_wrapper_tag || block.depth != @current_depth
-        if @current_depth < block.depth
-          push_depth(body, new_wrapper_tag)
-        elsif @current_depth > block.depth
-          pop_depth(body, times: @current_depth - block.depth)
-          pop_nesting(body) unless new_wrapper_tag
-        elsif new_wrapper_tag
-          push_nesting(body, new_wrapper_tag)
-        elsif @previous_parents.size > 1
-          pop_nesting(body)
-        end
-        @current_depth = block.depth
-      end
     end
 
     def apply_styles_to(html, style_names, child)
@@ -140,33 +119,6 @@ module DraftjsHtml
       end
 
       content
-    end
-
-    def push_depth(builder, tagname)
-      @previous_parents << builder.parent
-      builder.parent = builder.parent.last_element_child
-      push_nesting(builder, tagname)
-    end
-
-    def push_nesting(builder, tagname)
-      node = create_child(builder, tagname)
-      @previous_parents << builder.parent
-      builder.parent = node
-    end
-
-    def pop_depth(builder, times:)
-      times.times do
-        pop_nesting(builder)
-        pop_nesting(builder)
-      end
-    end
-
-    def pop_nesting(builder)
-      builder.parent = @previous_parents.pop
-    end
-
-    def create_child(builder, tagname)
-      builder.parent.add_child(builder.doc.create_element(tagname))
     end
 
     def ensure_options!(opts)
