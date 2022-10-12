@@ -1,52 +1,10 @@
 require_relative 'node'
 require_relative 'html_depth'
+require_relative 'html_defaults'
+require_relative 'overrideable_map'
 
 module DraftjsHtml
   class ToHtml
-    BLOCK_TYPE_TO_HTML = {
-      'unstyled' => 'p',
-      'paragraph' => 'p',
-      'header-one' => 'h1',
-      'header-two' => 'h2',
-      'header-three' => 'h3',
-      'header-four' => 'h4',
-      'header-five' => 'h5',
-      'header-six' => 'h6',
-      'blockquote' => 'blockquote',
-      'code-block' => 'code',
-      'ordered-list-item' => 'li',
-      'unordered-list-item' => 'li',
-      'atomic' => 'figure',
-    }.freeze
-    STYLE_MAP = {
-      'BOLD' => 'b',
-      'ITALIC' => 'i',
-      'STRIKETHROUGH' => 'del',
-      'UNDERLINE' => 'u',
-    }.freeze
-
-    DEFAULT_ENTITY_STYLE_FN = ->(_entity, chars, _doc) { chars }
-    ENTITY_ATTRIBUTE_NAME_MAP = {
-      'className' => 'class',
-      'url' => 'href',
-    }.freeze
-    ENTITY_CONVERSION_MAP = {
-      'LINK' => ->(entity, content, *) {
-        attributes = entity.data.slice('url', 'rel', 'target', 'title', 'className').each_with_object({}) do |(attr, value), h|
-          h[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
-        end
-
-        DraftjsHtml::Node.new('a', attributes, content)
-      },
-      'IMAGE' => ->(entity, *) {
-        attributes = entity.data.slice('src', 'alt', 'className', 'width', 'height').each_with_object({}) do |(attr, value), h|
-          h[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
-        end
-
-        DraftjsHtml::Node.new('img', attributes)
-      }
-    }.freeze
-
     def initialize(options)
       @options = ensure_options!(options)
       @document = Nokogiri::HTML::Builder.new(encoding: @options.fetch(:encoding, 'UTF-8'))
@@ -103,18 +61,18 @@ module DraftjsHtml
     def block_element_for(block)
       return 'br' if block.blank?
 
-      @options[:block_type_mapping].fetch(block.type)
+      @options[:block_type_mapping].value_of!(block.type)
     end
 
     def style_element_for(style)
-      @options[:inline_style_mapping][style]
+      @options[:inline_style_mapping].value_of!(style)
     end
 
     def try_apply_entity_to(draftjs, char_range)
       entity = draftjs.find_entity(char_range.entity_key)
       content = char_range.text
       if entity
-        style_fn = (@options[:entity_style_mappings][entity.type] || DEFAULT_ENTITY_STYLE_FN)
+        style_fn = @options[:entity_style_mappings].value_of(entity.type)
         content = style_fn.call(entity, Node.of(content), @document.parent)
       end
 
@@ -122,10 +80,14 @@ module DraftjsHtml
     end
 
     def ensure_options!(opts)
-      opts[:entity_style_mappings] = ENTITY_CONVERSION_MAP.merge(opts[:entity_style_mappings] || {}).transform_keys(&:to_s)
-      opts[:block_type_mapping] = BLOCK_TYPE_TO_HTML.merge(opts[:block_type_mapping] || {})
+      opts[:entity_style_mappings] = OverrideableMap.new(HtmlDefaults::ENTITY_CONVERSION_MAP)
+        .with_overrides(opts[:entity_style_mappings])
+        .with_default(HtmlDefaults::DEFAULT_ENTITY_STYLE_FN)
+      opts[:block_type_mapping] = OverrideableMap.new(HtmlDefaults::BLOCK_TYPE_TO_HTML)
+        .with_overrides(opts[:block_type_mapping])
       opts[:newline_squeezer] = opts[:squeeze_newlines] ? ->(text) { text.gsub(/(\n|\r\n)+/, "\n") } : ->(text) { text }
-      opts[:inline_style_mapping] = STYLE_MAP.merge(opts[:inline_style_mapping] || {}).transform_keys(&:to_s)
+      opts[:inline_style_mapping] = OverrideableMap.new(HtmlDefaults::STYLE_MAP)
+        .with_overrides(opts[:inline_style_mapping])
       opts[:inline_style_renderer] ||= ->(*) { nil }
       opts
     end
