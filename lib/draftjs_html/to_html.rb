@@ -2,6 +2,7 @@ require_relative 'node'
 require_relative 'html_depth'
 require_relative 'html_defaults'
 require_relative 'overrideable_map'
+require_relative 'unicode_rtl_detector'
 
 module DraftjsHtml
   class ToHtml
@@ -55,7 +56,9 @@ module DraftjsHtml
     end
 
     def append_child(nokogiri, child)
-      nokogiri.parent.add_child(DraftjsHtml::Node.of(child).to_nokogiri(@document.doc))
+      new_node = DraftjsHtml::Node.of(child).to_nokogiri(@document.doc)
+      nokogiri.parent['dir'] = 'rtl' if UnicodeRtlDetector.new.contains_rtl?(new_node.inner_text)
+      nokogiri.parent.add_child(new_node)
     end
 
     def block_element_for(block)
