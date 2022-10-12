@@ -8,7 +8,7 @@ module DraftjsHtml
           key: raw['key'],
           text: raw['text'],
           type: raw['type'],
-          depth: raw['depth'],
+          depth: raw.fetch('depth', 0).to_i,
           inline_style_ranges: Array(raw['inlineStyleRanges']),
           raw_entity_ranges: Array(raw['entityRanges']),
         )
