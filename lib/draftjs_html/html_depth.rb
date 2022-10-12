@@ -14,6 +14,7 @@ module DraftjsHtml
       @current_depth = 0
       @body = body
       @previous_parents = [body.parent]
+      @parent_stack = [body.parent.name]
     end
 
     def apply(block)
@@ -37,6 +38,7 @@ module DraftjsHtml
 
     def push_depth(builder, tagname)
       @previous_parents << builder.parent
+      @parent_stack << tagname
       builder.parent = builder.parent.last_element_child
       push_nesting(builder, tagname)
     end
@@ -49,17 +51,23 @@ module DraftjsHtml
 
     def pop_depth(builder, times:)
       times.times do
-        pop_nesting(builder)
-        pop_nesting(builder)
+        begin
+          pop_nesting(builder)
+        end while builder.parent.name != @parent_stack.last
+        @parent_stack.pop
       end
     end
 
     def pop_nesting(builder)
-      builder.parent = @previous_parents.pop
+      builder.parent = @previous_parents.pop if nested?
     end
 
     def create_child(builder, tagname)
       builder.parent.add_child(builder.doc.create_element(tagname))
+    end
+
+    def nested?
+      body.parent.name != 'body'
     end
   end
 end

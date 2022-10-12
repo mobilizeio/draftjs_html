@@ -9,7 +9,6 @@ module DraftjsHtml
     def initialize(options)
       @options = ensure_options!(options)
       @document = Nokogiri::HTML::Builder.new(encoding: @options.fetch(:encoding, 'UTF-8'))
-      @html_depth = HtmlDepth.new(@document)
     end
 
     def convert(raw_draftjs)
@@ -17,7 +16,7 @@ module DraftjsHtml
 
       @document.html do |html|
         html.body do |body|
-          @previous_parents = [body.parent]
+          @html_depth = HtmlDepth.new(body)
 
           draftjs.blocks.each do |block|
             @html_depth.apply(block)
