@@ -54,12 +54,14 @@ RSpec.describe DraftjsHtml::Draftjs do
           'inlineStyleRanges' => [{ 'style' => 'BOLD', 'offset' => 0, 'length' => 6 }],
           'entityRanges' => [{ 'key' => 'mention-1', 'offset' => 0, 'length' => 6 }],
           'type' => 'unstyled',
+          'depth' => 0,
         },
         {
           'text' => 'another block',
           'inlineStyleRanges' => [],
           'entityRanges' => [],
           'type' => 'unstyled',
+          'depth' => 0,
         },
       ],
       'entityMap' => {

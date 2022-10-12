@@ -16,6 +16,7 @@ module DraftjsHtml
         {
           'text' => block.text,
           'type' => block.type,
+          'depth' => block.depth,
           'inlineStyleRanges' => block.inline_styles.map { { 'style' => _1.name, 'offset' => _1.offset, 'length' => _1.length } },
           'entityRanges' => block.entity_ranges.map { { 'key' => _1.name, 'offset' => _1.offset, 'length' => _1.length } },
         }
