@@ -14,51 +14,53 @@ module DraftjsHtml
       @current_depth = 0
       @body = body
       @previous_parents = [body.parent]
-      @parent_stack = [body.parent.name]
+      @nesting_roots = [body.parent.name]
     end
 
     def apply(block)
-      new_wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
-      if body.parent.name != new_wrapper_tag || block.depth != @current_depth
-        if @current_depth < block.depth
-          push_depth(body, new_wrapper_tag)
-        elsif @current_depth > block.depth
-          pop_depth(body, times: @current_depth - block.depth)
-          pop_nesting(body) unless new_wrapper_tag
-        elsif new_wrapper_tag
-          push_nesting(body, new_wrapper_tag)
-        elsif @previous_parents.size > 1
-          pop_nesting(body)
+      wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
+
+      if nesting_root_changed?(wrapper_tag) || depth_changed?(block)
+        if deepening?(block)
+          deepen(body, wrapper_tag)
+        elsif rising?(block)
+          rise(body, times: @current_depth - block.depth)
+          pop_parent(body) unless wrapper_tag
+        elsif wrapper_tag
+          push_parent(body, wrapper_tag)
+        elsif nested?
+          pop_parent(body)
         end
+
         @current_depth = block.depth
       end
     end
 
     private
 
-    def push_depth(builder, tagname)
+    def deepen(builder, tagname)
       @previous_parents << builder.parent
-      @parent_stack << tagname
+      @nesting_roots << tagname
       builder.parent = builder.parent.last_element_child
-      push_nesting(builder, tagname)
+      push_parent(builder, tagname)
     end
 
-    def push_nesting(builder, tagname)
+    def push_parent(builder, tagname)
       node = create_child(builder, tagname)
       @previous_parents << builder.parent
       builder.parent = node
     end
 
-    def pop_depth(builder, times:)
+    def rise(builder, times:)
       times.times do
         begin
-          pop_nesting(builder)
-        end while builder.parent.name != @parent_stack.last
-        @parent_stack.pop
+          pop_parent(builder)
+        end while builder.parent.name != @nesting_roots.last
+        @nesting_roots.pop
       end
     end
 
-    def pop_nesting(builder)
+    def pop_parent(builder)
       builder.parent = @previous_parents.pop if nested?
     end
 
@@ -68,6 +70,22 @@ module DraftjsHtml
 
     def nested?
       body.parent.name != 'body'
+    end
+
+    def depth_changed?(block)
+      block.depth != @current_depth
+    end
+
+    def nesting_root_changed?(wrapper_tag)
+      body.parent.name != wrapper_tag
+    end
+
+    def rising?(block)
+      @current_depth > block.depth
+    end
+
+    def deepening?(block)
+      @current_depth < block.depth
     end
   end
 end
