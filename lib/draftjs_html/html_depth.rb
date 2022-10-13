@@ -8,8 +8,6 @@ module DraftjsHtml
       'unordered-list-item' => 'ul',
     }.freeze
 
-    attr_reader :body
-
     def initialize(body)
       @current_depth = 0
       @body = body
@@ -22,14 +20,14 @@ module DraftjsHtml
 
       if nesting_root_changed?(wrapper_tag) || depth_changed?(block)
         if deepening?(block)
-          deepen(body, wrapper_tag)
+          deepen(wrapper_tag)
         elsif rising?(block)
-          rise(body, times: @current_depth - block.depth)
-          pop_parent(body) unless wrapper_tag
+          rise(times: @current_depth - block.depth)
+          pop_parent unless wrapper_tag
         elsif wrapper_tag
-          push_parent(body, wrapper_tag)
+          push_parent(wrapper_tag)
         elsif nested?
-          pop_parent(body)
+          pop_parent
         end
 
         @current_depth = block.depth
@@ -38,38 +36,38 @@ module DraftjsHtml
 
     private
 
-    def deepen(builder, tagname)
-      @previous_parents << builder.parent
+    def deepen(tagname)
+      @previous_parents << @body.parent
       @nesting_roots << tagname
-      builder.parent = builder.parent.last_element_child
-      push_parent(builder, tagname)
+      @body.parent = @body.parent.last_element_child
+      push_parent(tagname)
     end
 
-    def push_parent(builder, tagname)
-      node = create_child(builder, tagname)
-      @previous_parents << builder.parent
-      builder.parent = node
+    def push_parent(tagname)
+      node = create_child(tagname)
+      @previous_parents << @body.parent
+      @body.parent = node
     end
 
-    def rise(builder, times:)
+    def rise(times:)
       times.times do
         begin
-          pop_parent(builder)
-        end while builder.parent.name != @nesting_roots.last
+          pop_parent
+        end while @body.parent.name != @nesting_roots.last
         @nesting_roots.pop
       end
     end
 
-    def pop_parent(builder)
-      builder.parent = @previous_parents.pop if nested?
+    def pop_parent
+      @body.parent = @previous_parents.pop if nested?
     end
 
-    def create_child(builder, tagname)
-      builder.parent.add_child(builder.doc.create_element(tagname))
+    def create_child(tagname)
+      @body.parent.add_child(@body.doc.create_element(tagname))
     end
 
     def nested?
-      body.parent.name != 'body'
+      @body.parent.name != 'body'
     end
 
     def depth_changed?(block)
@@ -77,7 +75,7 @@ module DraftjsHtml
     end
 
     def nesting_root_changed?(wrapper_tag)
-      body.parent.name != wrapper_tag
+      @body.parent.name != wrapper_tag
     end
 
     def rising?(block)
