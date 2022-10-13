@@ -59,7 +59,7 @@ module DraftjsHtml
     end
 
     def pop_parent
-      @body.parent = @previous_parents.pop if nested?
+      @body.parent = @previous_parents.pop
     end
 
     def create_child(tagname)
