@@ -16,34 +16,36 @@ module DraftjsHtml
     end
 
     def apply(block)
-      wrapper_tag = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
+      return unless nesting_root_changed?(block) || depth_changed?(block)
 
-      if nesting_root_changed?(wrapper_tag) || depth_changed?(block)
-        if deepening?(block)
-          deepen(wrapper_tag)
-        elsif rising?(block)
-          rise(times: @current_depth - block.depth)
-          pop_parent unless wrapper_tag
-        elsif wrapper_tag
-          push_parent(wrapper_tag)
-        elsif nested?
-          pop_parent
-        end
-
-        @current_depth = block.depth
+      if deepening?(block)
+        deepen(block)
+      elsif rising?(block) && still_nested?(block)
+        rise(times: @current_depth - block.depth)
+      elsif rising?(block)
+        rise(times: @current_depth - block.depth)
+        pop_parent
+      elsif still_nested?(block)
+        push_parent(block)
+      elsif nested?
+        pop_parent
       end
+
+      @current_depth = block.depth
     end
 
     private
 
-    def deepen(tagname)
+    def deepen(block)
+      tagname = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
       @previous_parents << @body.parent
       @nesting_roots << tagname
       @body.parent = @body.parent.last_element_child
-      push_parent(tagname)
+      push_parent(block)
     end
 
-    def push_parent(tagname)
+    def push_parent(block)
+      tagname = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
       node = create_child(tagname)
       @previous_parents << @body.parent
       @body.parent = node
@@ -70,12 +72,16 @@ module DraftjsHtml
       @body.parent.name != 'body'
     end
 
+    def still_nested?(block)
+      BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
+    end
+
     def depth_changed?(block)
       block.depth != @current_depth
     end
 
-    def nesting_root_changed?(wrapper_tag)
-      @body.parent.name != wrapper_tag
+    def nesting_root_changed?(block)
+      @body.parent.name != BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
     end
 
     def rising?(block)
