@@ -2,7 +2,7 @@ require 'securerandom'
 
 module DraftjsHtml
   module Draftjs
-    class RawDraftJs
+    class RawBuilder
       def self.build(&block)
         instance = new
         instance.instance_eval(&block)

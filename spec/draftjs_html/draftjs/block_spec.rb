@@ -1,6 +1,6 @@
 RSpec.describe DraftjsHtml::Draftjs::Block do
   it 'applies styles to each character in the text' do
-    raw = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Winter is coming'
       inline_style 'BOLD', 0..5
       inline_style 'ITALIC', 7..8
@@ -18,7 +18,7 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
   end
 
   it 'applies multiple styles to the same character' do
-    raw = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Winter is coming'
       inline_style 'ITALIC', 7..8
       inline_style 'BOLD', 7..8
@@ -35,7 +35,7 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
   end
 
   it 'applies overlapping styles' do
-    raw = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Winter is coming'
       inline_style 'ITALIC', 7..8
       inline_style 'BOLD', 0..8
@@ -52,7 +52,7 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
   end
 
   it 'applies entities to ranges of characters, too' do
-    raw = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Winter is coming'
       entity_range 'entity-key', 7..8
     end
@@ -68,7 +68,7 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
   end
 
   it 'can return ranges of characters that all share the same styles' do
-    raw = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Winter is coming'
       inline_style 'ITALIC', 7..8
       inline_style 'BOLD', 0..8
@@ -83,7 +83,7 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
   end
 
   it 'can return ranges of characters that all share the same styles, coalesced with their entities' do
-    raw = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Winter is coming'
       inline_style 'ITALIC', 7..8
       inline_style 'BOLD', 0..8
@@ -102,7 +102,7 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
   end
 
   it 'can apply a new style name to a given char range' do
-    raw = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Winter is coming'
     end
     block = described_class.parse(raw.dig('blocks', 0))
@@ -115,7 +115,7 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
   end
 
   it 'can apply a new style name to a given char range' do
-    raw = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Winter is coming'
     end
     block = described_class.parse(raw.dig('blocks', 0))
@@ -128,7 +128,7 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
   end
 
   it 'converts raw_entity_range `key` values to strings' do
-    raw = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Winter is coming'
       entity_range 0, 7..8
     end

@@ -2,13 +2,13 @@
 
 RSpec.describe DraftjsHtml::Draftjs do
   it 'parses basic raw Draftjs' do
-    draftjs = described_class.parse(DraftjsHtml::Draftjs::RawDraftJs.build { })
+    draftjs = described_class.parse(DraftjsHtml::Draftjs::RawBuilder.build { })
 
     expect(draftjs.blocks.size).to eq 0
   end
 
   it 'can describe general block properties' do
-    draftjs = described_class.parse(DraftjsHtml::Draftjs::RawDraftJs.build do
+    draftjs = described_class.parse(DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'hey there!'
     end)
 
@@ -22,7 +22,7 @@ RSpec.describe DraftjsHtml::Draftjs do
   end
 
   it 'parses and stores entities from the entityMap' do
-    draftjs = described_class.parse(DraftjsHtml::Draftjs::RawDraftJs.build do
+    draftjs = described_class.parse(DraftjsHtml::Draftjs::RawBuilder.build do
       text_block '@sansa'
       apply_entity 'mention', 0..5, key: 'mention-1', mutability: 'MUTABLE', data: {
         url: 'https://example.com/users/sansa'
@@ -37,7 +37,7 @@ RSpec.describe DraftjsHtml::Draftjs do
   end
 
   it 'can convert back to a valid raw format' do
-    draftjs = described_class.parse(DraftjsHtml::Draftjs::RawDraftJs.build do
+    draftjs = described_class.parse(DraftjsHtml::Draftjs::RawBuilder.build do
       text_block '@sansa'
       inline_style 'BOLD', 0..5
       apply_entity 'mention', 0..5, key: 'mention-1', mutability: 'MUTABLE', data: {

@@ -6,7 +6,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'generates valid HTML from the most basic of DraftJS' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Hello world!'
     end
 
@@ -16,7 +16,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'supports generating multiple blocks of plain text' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Hello world!'
       text_block 'Winter is coming.'
     end
@@ -27,7 +27,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'does not mangle text with special characters' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block '❄️ is coming'
     end
 
@@ -37,7 +37,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'does not allow for HTML injection from plaintext' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block '<p>this should render with entities</p>'
     end
 
@@ -47,7 +47,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'renders the various block types as their appropriate HTML elements' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       typed_block 'unstyled', 'plain text'
       typed_block 'paragraph', 'lorem ipsum'
       typed_block 'header-one', 'h1'
@@ -75,7 +75,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'renders the "double-element" block types as their appropriate HTML elements' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       typed_block 'code-block', 'puts "hello"'
     end
 
@@ -87,7 +87,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'renders the peer list-item block types as the same list' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       typed_block 'ordered-list-item', 'item 1'
       typed_block 'ordered-list-item', 'item 2'
     end
@@ -103,7 +103,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'can have non-peer block-types after a peer block-type' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       typed_block 'ordered-list-item', 'item 1'
       text_block 'afterward'
     end
@@ -117,7 +117,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'allows customizing the block type elements' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       typed_block 'arbitrary-block-type', 'opening section'
       text_block 'will still be rendered using defaults'
     end
@@ -134,7 +134,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'allows customizing the inline style elements' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Winter is coming'
       inline_style 'BOLD', 7..8
     end
@@ -151,7 +151,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'can apply inlineStyleRanges' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'afterward'
       inline_style 'BOLD', 5..8
     end
@@ -164,7 +164,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'generates valid HTML when inline styles overlap' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'afterward'
       inline_style 'BOLD', 5..8
       inline_style 'ITALIC', 0..5
@@ -178,7 +178,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'renders the raw character text for an entity that has no defined style' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'afterward'
       apply_entity 'mention', 0..8, data: { url: 'https://example.com/users/1' }
     end
@@ -191,7 +191,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'allows consumers to specify how entities are converted to HTML' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'afterward'
       apply_entity 'mention', 0..8, data: { url: 'https://example.com/users/1' }
     end
@@ -210,7 +210,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'applies styles to entity-wrapped content' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'hey @sansa'
       apply_entity 'mention', 4..9, data: { url: 'https://example.com/users/1' }
       inline_style 'BOLD', 0..9
@@ -230,7 +230,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'converts LINK entities to `a` tags' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block "Let's GO"
       apply_entity 'LINK', 6..7, data: {
         url: 'https://example.com/collect-200-dollars',
@@ -249,7 +249,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'converts IMAGE entities to `img` tags' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Look-y here'
       typed_block 'atomic', ' '
       apply_entity 'IMAGE', 0..1, data: {
@@ -270,7 +270,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'supports overriding the built-in style mappings with functions' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'afterward'
       inline_style 'BOLD', 5..8
       inline_style 'ITALIC', 5..8
@@ -290,7 +290,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'protects against HTML injection with custom inline-style rendering' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'after<p>bold</p>'
       inline_style 'BOLD', 5..
     end
@@ -307,7 +307,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'can fallback to default style rendering for basic styles and use the custom renderer for more complex ones' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'afterward'
       inline_style 'BOLD', 0..4
       inline_style 'CUSTOM', 5..8
@@ -326,7 +326,7 @@ RSpec.describe DraftjsHtml do
   end
 
   it 'can style inline ranges and entities at the same time' do
-    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Come visit #Westeros!'
       inline_style 'BOLD', 11..22
       apply_entity 'LINK', 11..22, data: { url: 'https://westeros.example.com' }
