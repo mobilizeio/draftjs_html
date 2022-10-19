@@ -2,7 +2,7 @@
 
 RSpec.describe DraftjsHtml, 'DraftjsHtml - RTL Languages' do
   it 'adds the `dir` attribute to block elements when it can determine the content should be RTL' do
-    raw_draftjs = RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
       text_block 'الشتاء قادم'
     end
 

@@ -2,7 +2,7 @@
 
 RSpec.describe DraftjsHtml, 'DraftjsHtml - Newlines and <br> tags' do
   it 'generates <br/> tags for unstyled, empty blocks' do
-    raw_draftjs = RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
       text_block 'Gimme a'
       text_block ''
     end
@@ -13,7 +13,7 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Newlines and <br> tags' do
   end
 
   it 'generates <br/> tags for explicit newline characters between text' do
-    raw_draftjs = RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
       text_block "Gimme a\nGimme a\n"
     end
 
@@ -23,7 +23,7 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Newlines and <br> tags' do
   end
 
   it 'keeps <br> tags at the beginning of a style range within a block' do
-    raw_draftjs = RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
       text_block "There is only one thing we say to death:\n\nNot today."
       inline_style 'BOLD', 42..51
     end
@@ -36,7 +36,7 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Newlines and <br> tags' do
   end
 
   it 'chomps explicit newlines from the end of a block' do
-    raw_draftjs = RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
       text_block "Valar Morghulis\n"
     end
 
@@ -48,7 +48,7 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Newlines and <br> tags' do
   end
 
   it 'allows squeezing/compacting/collapsing newlines' do
-    raw_draftjs = RawDraftJs.build do
+    raw_draftjs = DraftjsHtml::Draftjs::RawDraftJs.build do
       text_block "Winter\n\nis coming"
     end
 
