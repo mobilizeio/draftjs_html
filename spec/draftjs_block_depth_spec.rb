@@ -3,11 +3,11 @@
 RSpec.describe DraftjsHtml, 'DraftjsHtml - Block Depth & Nesting' do
   it 'renders nested peer list-item block types as the same list' do
     raw_draftjs = RawDraftJs.build do
-      block_type 'ordered-list-item', 'item 1'
-      block_type 'ordered-list-item', 'item 1.1', depth: 1
-      block_type 'ordered-list-item', 'item 1.1.1', depth: 2
-      block_type 'ordered-list-item', 'item 1.2', depth: 1
-      block_type 'ordered-list-item', 'item 2', depth: 0
+      typed_block 'ordered-list-item', 'item 1'
+      typed_block 'ordered-list-item', 'item 1.1', depth: 1
+      typed_block 'ordered-list-item', 'item 1.1.1', depth: 2
+      typed_block 'ordered-list-item', 'item 1.2', depth: 1
+      typed_block 'ordered-list-item', 'item 2', depth: 0
       text_block 'And something after'
     end
 
@@ -31,9 +31,9 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Block Depth & Nesting' do
 
   it 'pops depth all the way up' do
     raw_draftjs = RawDraftJs.build do
-      block_type 'ordered-list-item', 'item 1'
-      block_type 'ordered-list-item', 'item 1.1', depth: 1
-      block_type 'ordered-list-item', 'item 1.1.1', depth: 2
+      typed_block 'ordered-list-item', 'item 1'
+      typed_block 'ordered-list-item', 'item 1.1', depth: 1
+      typed_block 'ordered-list-item', 'item 1.1.1', depth: 2
       text_block 'And something after'
     end
 
@@ -56,10 +56,10 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Block Depth & Nesting' do
   it 'handles depth on non-nested peer block types' do
     raw_draftjs = RawDraftJs.build do
       text_block 'Top level'
-      block_type 'ordered-list-item', 'Item 1', depth: 0
-      block_type 'ordered-list-item', 'Item 1.1', depth: 1
-      block_type 'unstyled', 'Has depth, but just a tag', depth: 1
-      block_type 'unstyled', '', depth: 0
+      typed_block 'ordered-list-item', 'Item 1', depth: 0
+      typed_block 'ordered-list-item', 'Item 1.1', depth: 1
+      typed_block 'unstyled', 'Has depth, but just a tag', depth: 1
+      typed_block 'unstyled', '', depth: 0
     end
 
     html = described_class.to_html(raw_draftjs)
@@ -78,14 +78,14 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Block Depth & Nesting' do
 
   it 'properly places non-list items within the current nesting' do
     raw_draftjs = RawDraftJs.build do
-      block_type 'unordered-list-item', 'item 1', depth: 0
-      block_type 'unordered-list-item', 'item 1.1', depth: 1
-      block_type 'unstyled', '', depth: 1
-      block_type 'unordered-list-item', 'item 2', depth: 0
-      block_type 'unordered-list-item', 'item 2.1', depth: 1
-      block_type 'unordered-list-item', 'item 2.2', depth: 1
-      block_type 'unstyled', '', depth: 1
-      block_type 'unstyled', ' ', depth: 0
+      typed_block 'unordered-list-item', 'item 1', depth: 0
+      typed_block 'unordered-list-item', 'item 1.1', depth: 1
+      typed_block 'unstyled', '', depth: 1
+      typed_block 'unordered-list-item', 'item 2', depth: 0
+      typed_block 'unordered-list-item', 'item 2.1', depth: 1
+      typed_block 'unordered-list-item', 'item 2.2', depth: 1
+      typed_block 'unstyled', '', depth: 1
+      typed_block 'unstyled', ' ', depth: 0
     end
 
     html = described_class.to_html(raw_draftjs)

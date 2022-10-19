@@ -48,15 +48,15 @@ RSpec.describe DraftjsHtml do
 
   it 'renders the various block types as their appropriate HTML elements' do
     raw_draftjs = RawDraftJs.build do
-      block_type 'unstyled', 'plain text'
-      block_type 'paragraph', 'lorem ipsum'
-      block_type 'header-one', 'h1'
-      block_type 'header-two', 'h2'
-      block_type 'header-three', 'h3'
-      block_type 'header-four', 'h4'
-      block_type 'header-five', 'h5'
-      block_type 'header-six', 'h6'
-      block_type 'blockquote', 'minaswan'
+      typed_block 'unstyled', 'plain text'
+      typed_block 'paragraph', 'lorem ipsum'
+      typed_block 'header-one', 'h1'
+      typed_block 'header-two', 'h2'
+      typed_block 'header-three', 'h3'
+      typed_block 'header-four', 'h4'
+      typed_block 'header-five', 'h5'
+      typed_block 'header-six', 'h6'
+      typed_block 'blockquote', 'minaswan'
     end
 
     html = described_class.to_html(raw_draftjs)
@@ -76,7 +76,7 @@ RSpec.describe DraftjsHtml do
 
   it 'renders the "double-element" block types as their appropriate HTML elements' do
     raw_draftjs = RawDraftJs.build do
-      block_type 'code-block', 'puts "hello"'
+      typed_block 'code-block', 'puts "hello"'
     end
 
     html = described_class.to_html(raw_draftjs)
@@ -88,8 +88,8 @@ RSpec.describe DraftjsHtml do
 
   it 'renders the peer list-item block types as the same list' do
     raw_draftjs = RawDraftJs.build do
-      block_type 'ordered-list-item', 'item 1'
-      block_type 'ordered-list-item', 'item 2'
+      typed_block 'ordered-list-item', 'item 1'
+      typed_block 'ordered-list-item', 'item 2'
     end
 
     html = described_class.to_html(raw_draftjs)
@@ -104,7 +104,7 @@ RSpec.describe DraftjsHtml do
 
   it 'can have non-peer block-types after a peer block-type' do
     raw_draftjs = RawDraftJs.build do
-      block_type 'ordered-list-item', 'item 1'
+      typed_block 'ordered-list-item', 'item 1'
       text_block 'afterward'
     end
 
@@ -118,7 +118,7 @@ RSpec.describe DraftjsHtml do
 
   it 'allows customizing the block type elements' do
     raw_draftjs = RawDraftJs.build do
-      block_type 'arbitrary-block-type', 'opening section'
+      typed_block 'arbitrary-block-type', 'opening section'
       text_block 'will still be rendered using defaults'
     end
 
@@ -251,7 +251,7 @@ RSpec.describe DraftjsHtml do
   it 'converts IMAGE entities to `img` tags' do
     raw_draftjs = RawDraftJs.build do
       text_block 'Look-y here'
-      block_type 'atomic', ' '
+      typed_block 'atomic', ' '
       apply_entity 'IMAGE', 0..1, data: {
         src: 'https://example.com/where',
         width: 400,

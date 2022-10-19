@@ -13,10 +13,10 @@ class RawDraftJs
   end
 
   def text_block(text)
-    block_type('unstyled', text)
+    typed_block('unstyled', text)
   end
 
-  def block_type(type, text, depth: 0)
+  def typed_block(type, text, depth: 0)
     @blocks << { 'key' => SecureRandom.urlsafe_base64(10), 'text' => text, 'type' => type, 'depth' => depth }
   end
 
