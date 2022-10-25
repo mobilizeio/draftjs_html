@@ -1,8 +1,8 @@
 module DraftjsHtml
   module HtmlDefaults
     BLOCK_TYPE_TO_HTML = {
-      'unstyled' => 'p',
       'paragraph' => 'p',
+      'unstyled' => 'p',
       'header-one' => 'h1',
       'header-two' => 'h2',
       'header-three' => 'h3',
@@ -21,6 +21,18 @@ module DraftjsHtml
       'ITALIC' => 'i',
       'STRIKETHROUGH' => 'del',
       'UNDERLINE' => 'u',
+    }.freeze
+
+    HTML_STYLE_TAGS_TO_STYLE = {
+      'b' => 'BOLD',
+      'i' => 'ITALIC',
+      'em' => 'ITALIC',
+      'del' => 'STRIKETHROUGH',
+      'u' => 'UNDERLINE',
+      'strong' => 'BOLD',
+      'small' => 'SMALL',
+      'sub' => 'SUBSCRIPT',
+      'sup' => 'SUPERSCRIPT',
     }.freeze
 
     ENTITY_ATTRIBUTE_NAME_MAP = {

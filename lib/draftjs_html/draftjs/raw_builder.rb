@@ -14,8 +14,8 @@ module DraftjsHtml
         @entity_map = {}
       end
 
-      def text_block(text)
-        typed_block('unstyled', text)
+      def text_block(text, depth: 0)
+        typed_block('unstyled', text, depth: depth)
       end
 
       def typed_block(type, text, depth: 0)
@@ -38,6 +38,10 @@ module DraftjsHtml
         }
 
         entity_range(key, range)
+      end
+
+      def has_blocks?
+        @blocks.any?
       end
 
       def to_h
