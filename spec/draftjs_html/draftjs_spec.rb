@@ -50,6 +50,7 @@ RSpec.describe DraftjsHtml::Draftjs do
     expect(draftjs.to_raw).to match({
       'blocks' => [
         {
+          'key' => an_instance_of(String),
           'text' => '@sansa',
           'inlineStyleRanges' => [{ 'style' => 'BOLD', 'offset' => 0, 'length' => 6 }],
           'entityRanges' => [{ 'key' => 'mention-1', 'offset' => 0, 'length' => 6 }],
@@ -57,6 +58,7 @@ RSpec.describe DraftjsHtml::Draftjs do
           'depth' => 0,
         },
         {
+          'key' => an_instance_of(String),
           'text' => 'another block',
           'inlineStyleRanges' => [],
           'entityRanges' => [],

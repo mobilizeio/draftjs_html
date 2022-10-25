@@ -14,6 +14,7 @@ module DraftjsHtml
 
       def convert_block(block)
         {
+          'key' => block.key,
           'text' => block.text,
           'type' => block.type,
           'depth' => block.depth,
