@@ -51,6 +51,21 @@ module DraftjsHtml
         }
       end
 
+      def to_s
+        draftjs = DraftjsHtml::Draftjs.parse(to_h)
+        draftjs.blocks.reduce('') do |acc, block|
+          acc << "typed_block '#{block.type}', '#{block.text}', depth: #{block.depth}\n"
+          block.inline_styles.each do |style|
+            acc << "inline_style '#{style.name}', #{style.range.begin}..#{style.range.end} # (#{style.offset} + #{style.length})\n"
+          end
+          block.entity_ranges.each do |entity_range|
+            entity = draftjs.entity_map[entity_range.name]
+            acc << "apply_entity '#{entity.type}', #{entity_range.range.begin}..#{entity_range.range.end}\n"
+          end
+          acc
+        end
+      end
+
       private
 
       def deep_stringify_keys(object)
