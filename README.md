@@ -177,6 +177,44 @@ end
 # will nest HTML nodes as you probably want (e.g. "<p>hi!</p>")
 ```
 
+### FromHtml (beta)
+
+As an experiment, this gem is providing the ability to convert from HTML to raw
+DraftJS JSON. You can explore this behavior with the following snippet:
+
+```ruby
+DraftjsHtml.from_html("<p>Hello!</p>") # => { "blocks" => [{ "text": "Hello!", "type" => "unstyled" } ] }
+```
+
+There are some known limitations with this approach, but, if you're just trying
+to get started, it may be good enough for you. Contributions and issue reports
+are welcome and encouraged.
+
+#### `:node_to_entity:`
+
+This `FromHtml` option allows the user to specify how a particular node is
+converted to a DraftJS entity. By default, the library converts `img` and `a`
+tags to `IMAGE` and `LINK` entities, respectively. If you specify this option,
+you override the existing behavior and must define those conversions yourself.
+
+The option expects a `callable` (`proc`, `lambda`, etc) that receives 3 arguments:
+
+- tagname (e.g. `a`) - always downcased
+- content - the text content inside the tag
+- HTML attributes - any HTML attributes on the tag as a Hash (string keys)
+
+The callable should return a Hash with symbol keys. The supported values are:
+
+- `type` (required)
+  - the entity "type" or name
+- `mutability` (optional, default `'IMMUTABLE'`)
+  - either 'MUTABLE', 'IMMUTABLE', or 'SEGMENTED'
+- `atomic` (optional, default `false`)
+  - when true, creates a new "atomic" block for this entity rather than apply 
+    the entity to the current range
+- `data` (optional, default `{}`)
+  - an arbitrary data-bag (Hash) of entity data
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run
