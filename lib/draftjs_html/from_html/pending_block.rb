@@ -39,7 +39,7 @@ module DraftjsHtml
       def flush_to(draftjs, styles)
         if text_buffer.any?
           chars.join.lines.each do |line|
-            draftjs.typed_block(block_name, line.strip, depth: [depth, 0].max)
+            draftjs.typed_block(block_name, line.chomp, depth: [depth, 0].max)
           end
 
           styles.each do |descriptor|
@@ -57,10 +57,7 @@ module DraftjsHtml
           range = entity[:start]..entity[:finish]
           if entity[:atomic]
             draftjs.typed_block('atomic', ' ', depth: [depth, 0].max)
-            range = 0..1
-          elsif range.size < 1
-            draftjs.typed_block('atomic', ' ', depth: [depth, 0].max) unless draftjs.has_blocks?
-            range = (range.begin..range.end + 1)
+            range = 0..0
           end
 
           draftjs.apply_entity entity[:type], range, data: entity[:data], mutability: entity.fetch(:mutability, 'IMMUTABLE')

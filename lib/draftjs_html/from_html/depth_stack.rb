@@ -54,9 +54,14 @@ module DraftjsHtml
         while current.pending_entities.any?
           pending_entity = current.pending_entities.pop
           range = pending_entity[:start]..current_character_offset
-          user_created_entity = conversion.call(pending_entity[:tagname], current_text_buffer[range], pending_entity[:attrs])
+          content = current_text_buffer[range]
+          user_created_entity = conversion.call(pending_entity[:tagname], content, pending_entity[:attrs])
           next unless user_created_entity
 
+          if content == '' && !user_created_entity[:atomic]
+            current.text_buffer << ' '
+            range = range.begin..(range.end+1)
+          end
           current.entities << user_created_entity.merge(start: range.begin, finish: range.end)
         end
       end

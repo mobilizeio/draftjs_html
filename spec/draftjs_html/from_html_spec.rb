@@ -148,7 +148,7 @@ RSpec.describe DraftjsHtml::FromHtml do
 
     expect(raw_draftjs).to eq_raw_draftjs {
       typed_block 'atomic', ' '
-      apply_entity 'IMAGE', 0..1, data: {
+      apply_entity 'IMAGE', 0..0, data: {
         src: 'https://example.com/placekitten',
         alt: 'A kitten!',
         class: 'my-image',
@@ -164,9 +164,9 @@ RSpec.describe DraftjsHtml::FromHtml do
     HTML
 
     expect(raw_draftjs).to eq_raw_draftjs {
-      typed_block 'unordered-list-item', 'Hi!', depth: 0
+      typed_block 'unordered-list-item', 'Hi! ', depth: 0
       typed_block 'atomic', ' ', depth: 1
-      apply_entity 'IMAGE', 0..1, data: { src: 'https://example.com/placekitten' }
+      apply_entity 'IMAGE', 0..0, data: { src: 'https://example.com/placekitten' }
     }
   end
 
@@ -176,9 +176,9 @@ RSpec.describe DraftjsHtml::FromHtml do
     HTML
 
     expect(raw_draftjs).to eq_raw_draftjs {
-      text_block 'Oh ... hello'
+      text_block 'Oh ... hello '
       typed_block 'atomic', ' '
-      apply_entity 'IMAGE', 0..1, data: { src: 'https://example.com/placekitten' }
+      apply_entity 'IMAGE', 0..0, data: { src: 'https://example.com/placekitten' }
     }
   end
 
@@ -267,7 +267,7 @@ RSpec.describe DraftjsHtml::FromHtml do
     HTML
 
     expect(raw_draftjs).to eq_raw_draftjs {
-      typed_block 'atomic', ' '
+      typed_block 'unstyled', ' '
       apply_entity 'ARBITRARY', 0..0, data: { 'data-attr' => '1' }
     }
   end
@@ -286,7 +286,7 @@ RSpec.describe DraftjsHtml::FromHtml do
     HTML
 
     expect(raw_draftjs).to eq_raw_draftjs {
-      text_block 'Hi ,'
+      text_block 'Hi  ,'
       apply_entity 'ARBITRARY', 3..3, data: { 'data-attr' => '1' }
     }
   end
@@ -469,6 +469,25 @@ RSpec.describe DraftjsHtml::FromHtml do
     expect(raw_draftjs).to eq_raw_draftjs {
       text_block 'Best,'
       text_block 'Yours truly'
+    }
+  end
+
+  it 'adds a space (" ") character for empty tags that are user-converted to entities' do
+    options = {
+      node_to_entity: ->(tagname, _content, _attributes) {
+        if tagname == 'span'
+          { type: 'REPLACED', data: {} }
+        end
+      }
+    }
+    subject = described_class.new(options)
+    raw_draftjs = subject.convert(<<~HTML)
+      <p>Lookie here! <span></span> three spaces before me</p>
+    HTML
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      text_block 'Lookie here!   three spaces before me'
+      apply_entity 'REPLACED', 13..13
     }
   end
 end
