@@ -2,13 +2,13 @@ require_relative 'node'
 require_relative 'html_depth'
 require_relative 'html_defaults'
 require_relative 'overrideable_map'
-require_relative 'unicode_rtl_detector'
 
 module DraftjsHtml
   class ToHtml
     def initialize(options)
       @options = ensure_options!(options)
       @document = Nokogiri::HTML::Builder.new(encoding: @options.fetch(:encoding, 'UTF-8'))
+      @current_bidi_direction = CurrentBidiDirection.new
     end
 
     def convert(raw_draftjs)
@@ -56,7 +56,8 @@ module DraftjsHtml
 
     def append_child(nokogiri, child)
       new_node = DraftjsHtml::Node.of(child).to_nokogiri(@document.doc)
-      nokogiri.parent['dir'] = 'rtl' if UnicodeRtlDetector.new.contains_rtl?(new_node.inner_text)
+      @current_bidi_direction.update(new_node.inner_text)
+      nokogiri.parent['dir'] = 'rtl' if @current_bidi_direction.rtl?
       nokogiri.parent.add_child(new_node)
     end
 

@@ -3,6 +3,7 @@
 require_relative "draftjs_html/version"
 require 'nokogiri'
 require_relative 'draftjs_html/draftjs'
+require_relative 'draftjs_html/current_bidi_direction'
 require_relative 'draftjs_html/to_html'
 require_relative 'draftjs_html/from_html'
 
