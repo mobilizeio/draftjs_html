@@ -10,4 +10,36 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - RTL Languages' do
 
     expect(html).to eq '<p dir="rtl">الشتاء قادم</p>'
   end
+
+  it 'adds the `dir` attribute on all parent elements up to the highest block-parent' do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
+      text_block 'الشتاء قادم'
+      inline_style 'UNDERLINE', 0..10
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq '<p dir="rtl"><u dir="rtl">الشتاء قادم</u></p>'
+  end
+
+  it 'applies `dir` to all parents on lists' do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
+      typed_block 'ordered-list-item', 'الشتاء قادم', depth: 0
+      typed_block 'ordered-list-item', 'Winter is coming', depth: 1
+      typed_block 'ordered-list-item', 'الشتاء قادم', depth: 1
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq_ignoring_whitespace <<~HTML
+      <ol dir="rtl">
+        <li dir="rtl">الشتاء قادم
+          <ol dir="rtl">
+            <li>Winter is coming</li>
+            <li dir="rtl">الشتاء قادم</li>
+          </ol>
+        </li>
+      </ol>
+    HTML
+  end
 end

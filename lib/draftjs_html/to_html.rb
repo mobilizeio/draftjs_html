@@ -56,9 +56,19 @@ module DraftjsHtml
 
     def append_child(nokogiri, child)
       new_node = DraftjsHtml::Node.of(child).to_nokogiri(@document.doc)
-      @current_bidi_direction.update(new_node.inner_text)
-      nokogiri.parent['dir'] = 'rtl' if @current_bidi_direction.rtl?
+      apply_bidi_direction(new_node.inner_text, nokogiri)
       nokogiri.parent.add_child(new_node)
+    end
+
+    def apply_bidi_direction(text, nokogiri)
+      @current_bidi_direction.update(text)
+      if @current_bidi_direction.rtl?
+        current_parent = nokogiri.parent
+        while current_parent.name != 'body'
+          current_parent['dir'] = 'rtl'
+          current_parent = current_parent.parent
+        end
+      end
     end
 
     def block_element_for(block)
