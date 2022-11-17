@@ -163,6 +163,22 @@ RSpec.describe DraftjsHtml do
     HTML
   end
 
+  it 'supports CODE inlinestyle and code-block blocks' do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
+      text_block 'puts "hello world"'
+      inline_style 'CODE', 5..17
+
+      typed_block 'code-block', 'puts "oh hello there"'
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq <<~HTML.strip
+      <p>puts <code>"hello world"</code></p>
+      <pre><code>puts "oh hello there"</code></pre>
+    HTML
+  end
+
   it 'generates valid HTML when inline styles overlap' do
     raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'afterward'

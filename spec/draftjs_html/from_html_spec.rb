@@ -321,7 +321,11 @@ RSpec.describe DraftjsHtml::FromHtml do
       expect(subject.convert("<#{tag}>text</#{tag}>")).to eq_raw_draftjs { text_block 'text' }, "failed for #{tag}"
     end
 
-    DraftjsHtml::HtmlDefaults::BLOCK_TYPE_TO_HTML.invert.each do |tag, block_type|
+    block_elements_that_dont_need_parents = DraftjsHtml::HtmlDefaults::BLOCK_TYPE_TO_HTML.invert.reject do |tag, _|
+      %w[li code].include?(tag)
+    end
+
+    block_elements_that_dont_need_parents.each do |tag, block_type|
       subject = described_class.new
       expect(subject.convert("<#{tag}>text</#{tag}>")).to eq_raw_draftjs { typed_block block_type, 'text' }
     end
@@ -488,6 +492,17 @@ RSpec.describe DraftjsHtml::FromHtml do
     expect(raw_draftjs).to eq_raw_draftjs {
       text_block 'Lookie here!   three spaces before me'
       apply_entity 'REPLACED', 13..13
+    }
+  end
+
+  it 'converts `code` tags inside block elements to an inline style' do
+    raw_draftjs = subject.convert(<<~HTML)
+      <p>Lookie here! <code>puts "some code"</code></p>
+    HTML
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      text_block 'Lookie here! puts "some code"'
+      inline_style 'CODE', 13..28
     }
   end
 end

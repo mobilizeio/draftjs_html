@@ -26,6 +26,7 @@ module DraftjsHtml
       'small' => 'SMALL',
       'sub' => 'SUBSCRIPT',
       'sup' => 'SUPERSCRIPT',
+      'code' => 'CODE',
     }.freeze
 
     STYLE_MAP = HTML_STYLE_TAGS_TO_STYLE.invert.freeze
