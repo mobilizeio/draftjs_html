@@ -16,24 +16,19 @@ module DraftjsHtml
       'atomic' => 'figure',
     }.freeze
 
-    STYLE_MAP = {
-      'BOLD' => 'b',
-      'ITALIC' => 'i',
-      'STRIKETHROUGH' => 'del',
-      'UNDERLINE' => 'u',
-    }.freeze
-
     HTML_STYLE_TAGS_TO_STYLE = {
+      'strong' => 'BOLD',
       'b' => 'BOLD',
-      'i' => 'ITALIC',
       'em' => 'ITALIC',
+      'i' => 'ITALIC',
       'del' => 'STRIKETHROUGH',
       'u' => 'UNDERLINE',
-      'strong' => 'BOLD',
       'small' => 'SMALL',
       'sub' => 'SUBSCRIPT',
       'sup' => 'SUPERSCRIPT',
     }.freeze
+
+    STYLE_MAP = HTML_STYLE_TAGS_TO_STYLE.invert.freeze
 
     ENTITY_ATTRIBUTE_NAME_MAP = {
       'className' => 'class',
