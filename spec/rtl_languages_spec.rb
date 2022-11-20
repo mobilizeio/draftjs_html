@@ -42,4 +42,17 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - RTL Languages' do
       </ol>
     HTML
   end
+
+  it 'creates block-level (div) tags with `dir="rtl"` for an RTL inline style' do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
+      text_block 'Winter is coming'
+      inline_style 'RTL', 0..15
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq_ignoring_whitespace <<~HTML
+      <p><div dir="rtl">Winter is coming</div></p>
+    HTML
+  end
 end

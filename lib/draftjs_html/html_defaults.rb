@@ -29,7 +29,10 @@ module DraftjsHtml
       'code' => 'CODE',
     }.freeze
 
-    STYLE_MAP = HTML_STYLE_TAGS_TO_STYLE.invert.freeze
+    STYLE_MAP = HTML_STYLE_TAGS_TO_STYLE.invert.merge(
+      'HIGHLIGHT' => 'em',
+      'RTL' => ['div', dir: 'rtl']
+    ).freeze
 
     ENTITY_ATTRIBUTE_NAME_MAP = {
       'className' => 'class',

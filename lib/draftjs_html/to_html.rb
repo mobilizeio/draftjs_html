@@ -49,7 +49,8 @@ module DraftjsHtml
       return append_child(html, custom_render_content) if custom_render_content
 
       style, *rest = style_names
-      html.public_send(style_element_for(style)) do |builder|
+
+      html.public_send(*style_element_for(style)) do |builder|
         apply_styles_to(builder, rest, child)
       end
     end
@@ -78,7 +79,7 @@ module DraftjsHtml
     end
 
     def style_element_for(style)
-      @options[:inline_style_mapping].value_of!(style)
+      Array(@options[:inline_style_mapping].value_of!(style))
     end
 
     def try_apply_entity_to(draftjs, char_range)
