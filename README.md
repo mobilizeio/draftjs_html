@@ -127,6 +127,20 @@ DraftjsHtml.to_html(raw_draftjs, options: {
 # This would generate <strong> tags instead of <b> tags around ranges of `BOLD` inline styles.
 ```
 
+You may also add attributes to tags created by `inline_style_mapping`s by using a two element array.
+The first element should be the tagname and the second argument a hash of attributes to values, like this:
+
+```ruby
+
+DraftjsHtml.to_html(raw_draftjs, options: {
+  inline_style_mapping: {
+    'BOLD' => ['strong', style: 'font-weight: 900'],
+  },
+})
+```
+
+# This would generate <strong> tags instead of <b> tags around ranges of `BOLD` inline styles.
+
 #### `:inline_style_renderer`
 
 If the direct mapping from `:inline_style_mapping` isn't enough, you can supply a custom function for rendering a style range.
