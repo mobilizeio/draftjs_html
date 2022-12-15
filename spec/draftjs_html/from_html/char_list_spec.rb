@@ -7,11 +7,11 @@ RSpec.describe DraftjsHtml::FromHtml::CharList do
   it 'can append a whole string to its list' do
     subject.append('hi there!')
 
-    expect(subject.chars).to eq [
-      char.new(it: 'h'), char.new(it: 'i'),
-      char.new(it: ' '),
-      char.new(it: 't'), char.new(it: 'h'), char.new(it: 'e'), char.new(it: 'r'), char.new(it: 'e'),
-      char.new(it: '!'),
+    expect(subject.chars.map(&:it)).to eq [
+      'h', 'i',
+      ' ',
+      't', 'h', 'e', 'r', 'e',
+      '!',
     ]
   end
 
@@ -44,6 +44,38 @@ RSpec.describe DraftjsHtml::FromHtml::CharList do
     subject.apply_entity(0..1, entity)
 
     expect(subject.entity_ranges.map(&:range)).to eq([0..1])
+  end
+
+  it 'attaches passed styles to each char in the string' do
+    subject.append('hi there!', styles: %w[BOLD ITALIC])
+
+    expect(subject.style_ranges).to eq([
+      described_class::StyleRange.new(styles: Set.new(%w[BOLD ITALIC]), start: 0, finish: 8),
+    ])
+    expect(subject.text).to eq 'hi there!'
+  end
+
+  it 'can append styles to text later' do
+    subject.append('hi there!')
+    subject.append_styles(0..1, %w[UNDERSCORE])
+
+    expect(subject.style_ranges).to eq([
+      described_class::StyleRange.new(styles: Set.new(%w[UNDERSCORE]), start: 0, finish: 1),
+    ])
+    expect(subject.text).to eq 'hi there!'
+  end
+
+  it 'generates correct ranges for overlapping styles' do
+    subject.append('hi there!')
+    subject.append_styles(0..5, %w[UNDERSCORE])
+    subject.append_styles(4..8, %w[BOLD])
+
+    expect(subject.style_ranges).to eq([
+      described_class::StyleRange.new(styles: Set.new(%w[UNDERSCORE]), start: 0, finish: 3),
+      described_class::StyleRange.new(styles: Set.new(%w[UNDERSCORE BOLD]), start: 4, finish: 5),
+      described_class::StyleRange.new(styles: Set.new(%w[BOLD]), start: 6, finish: 8),
+    ])
+    expect(subject.text).to eq 'hi there!'
   end
 
   it 'can add another charlist to its data and updates entity range indexes' do
