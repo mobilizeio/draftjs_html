@@ -131,22 +131,6 @@ module DraftjsHtml
           end
         end
       end
-
-      private
-
-      def find_overlapping_styles(descriptors)
-        descriptors.select do |candidate_a|
-          candidate_range = candidate_a[:start]..candidate_a[:finish]
-          (descriptors - [candidate_a]).any? do |other|
-            other_range = other[:start]..other[:finish]
-            range_overlaps?(candidate_range, other_range)
-          end
-        end
-      end
-
-      def range_overlaps?(candidate_range, other_range)
-        other_range.begin == candidate_range.begin || candidate_range.cover?(other_range.begin) || other_range.cover?(candidate_range.begin)
-      end
     end
   end
 end
