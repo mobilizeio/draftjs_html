@@ -229,6 +229,15 @@ The callable should return a Hash with symbol keys. The supported values are:
 - `data` (optional, default `{}`)
   - an arbitrary data-bag (Hash) of entity data
 
+#### `:is_semantic_markup:`
+
+Defaults to `true`.
+
+By setting to `false`, the user is stating they want to treat `div` tags as semantic,
+block-level tags. In some markup (emails, for example), there are no semantic tags
+(read, no `p` tags), so the only indications of whitespace and structure come from
+`div` tags. This flag will flush content wrapped in a `div` as a DraftJS block. 
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run

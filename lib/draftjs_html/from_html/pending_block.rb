@@ -1,7 +1,7 @@
 module DraftjsHtml
   class FromHtml < Nokogiri::XML::SAX::Document
-    PendingBlock = Struct.new(:tagname, :attrs, :chars, :entities, :pending_entities, :parent_tagnames, :depth, keyword_init: true) do
-      def self.from_tag(name, attrs, parent_tagnames, depth)
+    PendingBlock = Struct.new(:tagname, :attrs, :chars, :entities, :pending_entities, :parent_tagnames, :depth, :is_semantic_markup, keyword_init: true) do
+      def self.from_tag(name, attrs, parent_tagnames, depth, is_semantic_markup: true)
         self.new(
           tagname: name,
           attrs: attrs,
@@ -10,6 +10,7 @@ module DraftjsHtml
           pending_entities: [],
           depth: depth,
           parent_tagnames: parent_tagnames,
+          is_semantic_markup: is_semantic_markup,
         )
       end
 
@@ -23,7 +24,8 @@ module DraftjsHtml
 
       def flushable?
         %w[OPENING ol ul li table].include?(parent_tagnames.last) ||
-          (parent_tagnames.last == 'div' && tagname != 'div')
+          (parent_tagnames.last == 'div' && tagname != 'div') ||
+          (!is_semantic_markup && tagname == 'div')
       end
 
       def consume(other_pending_block)

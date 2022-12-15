@@ -46,8 +46,8 @@ RSpec.describe DraftjsHtml::FromHtml do
 
   it 'can end in `br` tags' do
     raw_draftjs = subject.convert(<<~HTML)
-    <ul><li>Share progress</li></ul>
-    <p>Do the stuff</p><br>
+      <ul><li>Share progress</li></ul>
+      <p>Do the stuff</p><br>
     HTML
 
     expect(raw_draftjs).to eq_raw_draftjs {
@@ -531,6 +531,23 @@ RSpec.describe DraftjsHtml::FromHtml do
 
       text_block "example 3"
       apply_entity 'LINK', 0..8, mutability: 'MUTABLE', data: { href: 'http://example3.example.com' }
+    }
+  end
+
+  it 'can treat divs as semantic block-elements via `is_semantic_markup: false`' do
+    subject = described_class.new(is_semantic_markup: false)
+    raw_draftjs = subject.convert(<<~HTML)
+      <div dir="ltr">
+        <div>test</div>
+        <a href="http://example1.example.com">example 1</a>
+      </div>
+    HTML
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      text_block "test"
+
+      text_block "example 1"
+      apply_entity 'LINK', 0..8, mutability: 'MUTABLE', data: { href: 'http://example1.example.com' }
     }
   end
 end
