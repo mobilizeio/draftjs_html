@@ -50,7 +50,8 @@ RSpec.describe DraftjsHtml::FromHtml::CharList do
     subject.append('hi there!', styles: %w[BOLD ITALIC])
 
     expect(subject.style_ranges).to eq([
-      described_class::StyleRange.new(styles: Set.new(%w[BOLD ITALIC]), start: 0, finish: 8),
+      described_class::StyleRange.new(style: 'BOLD', start: 0, finish: 8),
+      described_class::StyleRange.new(style: 'ITALIC', start: 0, finish: 8),
     ])
     expect(subject.text).to eq 'hi there!'
   end
@@ -60,7 +61,7 @@ RSpec.describe DraftjsHtml::FromHtml::CharList do
     subject.append_styles(0..1, %w[UNDERSCORE])
 
     expect(subject.style_ranges).to eq([
-      described_class::StyleRange.new(styles: Set.new(%w[UNDERSCORE]), start: 0, finish: 1),
+      described_class::StyleRange.new(style: 'UNDERSCORE', start: 0, finish: 1),
     ])
     expect(subject.text).to eq 'hi there!'
   end
@@ -71,9 +72,8 @@ RSpec.describe DraftjsHtml::FromHtml::CharList do
     subject.append_styles(4..8, %w[BOLD])
 
     expect(subject.style_ranges).to eq([
-      described_class::StyleRange.new(styles: Set.new(%w[UNDERSCORE]), start: 0, finish: 3),
-      described_class::StyleRange.new(styles: Set.new(%w[UNDERSCORE BOLD]), start: 4, finish: 5),
-      described_class::StyleRange.new(styles: Set.new(%w[BOLD]), start: 6, finish: 8),
+      described_class::StyleRange.new(style: 'UNDERSCORE', start: 0, finish: 5),
+      described_class::StyleRange.new(style: 'BOLD', start: 4, finish: 8),
     ])
     expect(subject.text).to eq 'hi there!'
   end

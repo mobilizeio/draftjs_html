@@ -28,7 +28,7 @@ module DraftjsHtml
         include FinishableRange
       end
 
-      StyleRange = Struct.new(:styles, :start, :finish, keyword_init: true) do
+      StyleRange = Struct.new(:style, :start, :finish, keyword_init: true) do
         include FinishableRange
       end
 
@@ -114,18 +114,38 @@ module DraftjsHtml
       end
 
       def style_ranges
-        current_styles = []
-
-        style_ranges = @chars.each_with_object(Array.new).with_index do |(char, ranges), i|
-          next if char.styles == current_styles
-
-          current_styles = char.styles
-          ranges.last&.try_finish(i - 1)
-          ranges << StyleRange.new(styles: char.styles, start: i) if char.styles.any?
+        style_ranges = @chars.each_with_object({}).with_index do |(char, ranges_by_style), i|
+          char.styles.each do |style|
+            ranges_by_style[style] ||= []
+            if i > 0 && @chars[i-1].styles.include?(style)
+              ranges_by_style[style].last << i
+            else
+              ranges_by_style[style] << [i]
+            end
+          end
         end
 
-        style_ranges.last&.try_finish(@chars.size - 1)
-        style_ranges
+        style_ranges.flat_map do |style, ranges|
+          ranges.map do |range|
+            StyleRange.new(style: style, start: range.first, finish: range.last)
+          end
+        end
+      end
+
+      private
+
+      def find_overlapping_styles(descriptors)
+        descriptors.select do |candidate_a|
+          candidate_range = candidate_a[:start]..candidate_a[:finish]
+          (descriptors - [candidate_a]).any? do |other|
+            other_range = other[:start]..other[:finish]
+            range_overlaps?(candidate_range, other_range)
+          end
+        end
+      end
+
+      def range_overlaps?(candidate_range, other_range)
+        other_range.begin == candidate_range.begin || candidate_range.cover?(other_range.begin) || other_range.cover?(candidate_range.begin)
       end
     end
   end

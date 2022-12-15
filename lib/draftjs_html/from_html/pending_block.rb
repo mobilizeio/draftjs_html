@@ -32,7 +32,7 @@ module DraftjsHtml
         self.entities += other_pending_block.entities
       end
 
-      def flush_to(draftjs, styles)
+      def flush_to(draftjs)
         if text_buffer.any?
           text_buffer.each_line do |line|
             block_type = line.atomic? ? 'atomic' : block_name
@@ -42,15 +42,12 @@ module DraftjsHtml
               entity = entity_range.entity
               draftjs.apply_entity entity[:type], entity_range.range, data: entity[:data], mutability: entity.fetch(:mutability, 'IMMUTABLE')
             end
-          end
 
-          styles.each do |descriptor|
-            finish = descriptor[:finish] || character_offset
-            draftjs.inline_style(descriptor[:style], descriptor[:start]..finish)
+            line.style_ranges.each do |style_range|
+              draftjs.inline_style(style_range.style, style_range.range)
+            end
           end
         end
-
-        styles.clear_finished
       end
 
       def block_name

@@ -5,7 +5,7 @@ module DraftjsHtml
         @stack = []
         @nodes = []
         @list_depth = -1
-        @style_stack = StyleStack.new
+        @active_styles = []
       end
 
       def push(tagname, attrs)
@@ -26,7 +26,7 @@ module DraftjsHtml
           @nodes.pop
         end
         blocks.reverse_each do |pending_block|
-          pending_block.flush_to(draftjs, @style_stack)
+          pending_block.flush_to(draftjs)
         end
         @list_depth -= 1
       end
@@ -68,19 +68,19 @@ module DraftjsHtml
       end
 
       def style_start(tagname)
-        @style_stack.track_start(tagname, current_character_offset + 1)
+        @active_styles += [DraftjsHtml::HtmlDefaults::HTML_STYLE_TAGS_TO_STYLE[tagname]]
       end
 
       def style_end(tagname)
-        @style_stack.track_end(tagname, current_character_offset)
+        @active_styles.delete_at(@active_styles.index(DraftjsHtml::HtmlDefaults::HTML_STYLE_TAGS_TO_STYLE[tagname]))
       end
 
       def flush_to(draftjs)
-        current.flush_to(draftjs, @style_stack)
+        current.flush_to(draftjs)
       end
 
       def append_text(chars)
-        current.text_buffer.append(chars) unless chars.empty?
+        current.text_buffer.append(chars, styles: @active_styles) unless chars.empty?
       end
 
       private
