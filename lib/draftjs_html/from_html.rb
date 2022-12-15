@@ -4,6 +4,7 @@ require_relative 'from_html/elements'
 require_relative 'from_html/style_stack'
 require_relative 'from_html/pending_block'
 require_relative 'from_html/depth_stack'
+require_relative 'from_html/char_list'
 
 module DraftjsHtml
   class FromHtml < Nokogiri::XML::SAX::Document

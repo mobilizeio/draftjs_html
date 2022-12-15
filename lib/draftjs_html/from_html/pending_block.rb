@@ -6,7 +6,7 @@ module DraftjsHtml
           tagname: name,
           attrs: attrs,
           entities: [],
-          chars: [],
+          chars: CharList.new,
           pending_entities: [],
           depth: depth,
           parent_tagnames: parent_tagnames,
@@ -17,12 +17,8 @@ module DraftjsHtml
         self[:chars]
       end
 
-      def clear_text_buffer
-        self[:chars] = []
-      end
-
       def character_offset
-        text_buffer.join.length - 1
+        text_buffer.size - 1
       end
 
       def flushable?
@@ -38,8 +34,14 @@ module DraftjsHtml
 
       def flush_to(draftjs, styles)
         if text_buffer.any?
-          chars.join.lines.each do |line|
-            draftjs.typed_block(block_name, line.chomp, depth: [depth, 0].max)
+          text_buffer.each_line do |line|
+            block_type = line.atomic? ? 'atomic' : block_name
+            draftjs.typed_block(block_type, line.text, depth: [depth, 0].max)
+
+            line.entity_ranges.each do |entity_range|
+              entity = entity_range.entity
+              draftjs.apply_entity entity[:type], entity_range.range, data: entity[:data], mutability: entity.fetch(:mutability, 'IMMUTABLE')
+            end
           end
 
           styles.each do |descriptor|
@@ -48,20 +50,7 @@ module DraftjsHtml
           end
         end
 
-        clear_text_buffer
         styles.clear_finished
-      end
-
-      def apply_entities_to(draftjs)
-        Array(entities).each do |entity|
-          range = entity[:start]..entity[:finish]
-          if entity[:atomic]
-            draftjs.typed_block('atomic', ' ', depth: [depth, 0].max)
-            range = 0..0
-          end
-
-          draftjs.apply_entity entity[:type], range, data: entity[:data], mutability: entity.fetch(:mutability, 'IMMUTABLE')
-        end
       end
 
       def block_name

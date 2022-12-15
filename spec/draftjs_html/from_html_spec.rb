@@ -505,4 +505,32 @@ RSpec.describe DraftjsHtml::FromHtml do
       inline_style 'CODE', 13..28
     }
   end
+
+  it 'properly attributes entities to the correct block when a pending block is broken up by newlines' do
+    raw_draftjs = subject.convert(<<~HTML)
+      <div dir="ltr">
+        <a href="http://example1.example.com">example 1</a>
+        <br/>
+        <a href="http://example2.example.com">example 2</a>
+        <br>
+        <div><br></div>
+        <div>test<br/></div>
+        <a href="http://example3.example.com">example 3</a>
+      </div>
+    HTML
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      text_block "example 1"
+      apply_entity 'LINK', 0..8, mutability: 'MUTABLE', data: { href: 'http://example1.example.com' }
+
+      text_block "example 2"
+      apply_entity 'LINK', 0..8, mutability: 'MUTABLE', data: { href: 'http://example2.example.com' }
+
+      text_block ""
+      text_block "test"
+
+      text_block "example 3"
+      apply_entity 'LINK', 0..8, mutability: 'MUTABLE', data: { href: 'http://example3.example.com' }
+    }
+  end
 end

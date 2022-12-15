@@ -27,7 +27,6 @@ module DraftjsHtml
         end
         blocks.reverse_each do |pending_block|
           pending_block.flush_to(draftjs, @style_stack)
-          pending_block.apply_entities_to(draftjs)
         end
         @list_depth -= 1
       end
@@ -59,10 +58,12 @@ module DraftjsHtml
           next unless user_created_entity
 
           if content == '' && !user_created_entity[:atomic]
-            current.text_buffer << ' '
-            range = range.begin..(range.end+1)
+            current.text_buffer.append(' ', entity: user_created_entity)
+          elsif content == '' && user_created_entity[:atomic]
+            current.text_buffer.append_atomic_entity(user_created_entity)
+          else
+            current.text_buffer.apply_entity(range, user_created_entity)
           end
-          current.entities << user_created_entity.merge(start: range.begin, finish: range.end)
         end
       end
 
@@ -76,17 +77,16 @@ module DraftjsHtml
 
       def flush_to(draftjs)
         current.flush_to(draftjs, @style_stack)
-        current.apply_entities_to(draftjs)
       end
 
       def append_text(chars)
-        current.text_buffer << chars unless chars.empty?
+        current.text_buffer.append(chars) unless chars.empty?
       end
 
       private
 
       def current_text_buffer
-        current.text_buffer.join
+        current.text_buffer.text
       end
 
       def current_character_offset
