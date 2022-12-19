@@ -264,6 +264,22 @@ RSpec.describe DraftjsHtml do
     HTML
   end
 
+  it 'prefers `url` data in LINK entities over `href` data' do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
+      text_block "Let's GO"
+      apply_entity 'LINK', 6..7, data: {
+        url: 'https://example.com/collect-200-dollars',
+        href: 'https://example.com/ignored'
+      }
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq <<~HTML.strip
+      <p>Let's <a href="https://example.com/collect-200-dollars">GO</a></p>
+    HTML
+  end
+
   it 'converts IMAGE entities to `img` tags' do
     raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       text_block 'Look-y here'

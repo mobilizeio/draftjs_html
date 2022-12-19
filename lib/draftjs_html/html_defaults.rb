@@ -43,7 +43,7 @@ module DraftjsHtml
 
     ENTITY_CONVERSION_MAP = {
       'LINK' => ->(entity, content, *) {
-        attributes = entity.data.slice('url', 'href', 'rel', 'target', 'title', 'className').each_with_object({}) do |(attr, value), h|
+        attributes = entity.data.slice('href', 'url', 'rel', 'target', 'title', 'className').each_with_object({}) do |(attr, value), h|
           h[ENTITY_ATTRIBUTE_NAME_MAP.fetch(attr, attr)] = value
         end
 
