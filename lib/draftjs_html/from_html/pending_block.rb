@@ -32,23 +32,21 @@ module DraftjsHtml
       end
 
       def flush_to(draftjs)
-        if text_buffer.any?
-          text_buffer.each_line do |line|
-            block_type = line.atomic? ? 'atomic' : block_name
-            draftjs.typed_block(block_type, line.text, depth: [depth, 0].max)
+        text_buffer.each_line do |line|
+          block_type = line.atomic? ? 'atomic' : block_name
+          draftjs.typed_block(block_type, line.text, depth: [depth, 0].max)
 
-            line.entity_ranges.each do |entity_range|
-              entity = entity_range.entity
-              draftjs.apply_entity entity[:type], entity_range.range, data: entity[:data], mutability: entity.fetch(:mutability, 'IMMUTABLE')
-            end
-
-            line.style_ranges.each do |style_range|
-              draftjs.inline_style(style_range.style, style_range.range)
-            end
+          line.entity_ranges.each do |entity_range|
+            entity = entity_range.entity
+            draftjs.apply_entity entity[:type], entity_range.range, data: entity[:data], mutability: entity.fetch(:mutability, 'IMMUTABLE')
           end
 
-          self.text_buffer = CharList.new
+          line.style_ranges.each do |style_range|
+            draftjs.inline_style(style_range.style, style_range.range)
+          end
         end
+
+        self.text_buffer = CharList.new
       end
 
       def block_name
