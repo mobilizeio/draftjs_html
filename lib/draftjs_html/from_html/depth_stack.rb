@@ -1,16 +1,15 @@
 module DraftjsHtml
   class FromHtml < Nokogiri::XML::SAX::Document
     class DepthStack
-      def initialize(is_semantic_markup: true)
+      def initialize
         @stack = []
         @nodes = []
         @list_depth = -1
         @active_styles = []
-        @is_semantic_markup = is_semantic_markup
       end
 
       def push(tagname, attrs)
-        @stack << PendingBlock.from_tag(tagname, attrs, @nodes.dup, @list_depth, is_semantic_markup: @is_semantic_markup)
+        @stack << PendingBlock.from_tag(tagname, attrs, @nodes.dup, @list_depth)
         track_block_node(tagname)
       end
 

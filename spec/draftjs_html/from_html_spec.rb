@@ -554,21 +554,4 @@ RSpec.describe DraftjsHtml::FromHtml do
       typed_block 'unordered-list-item', 'item 1.1', depth: 1
     }
   end
-
-  it 'tries to interpret intent when `is_semantic_markup` is false' do
-    subject = described_class.new(is_semantic_markup: false)
-    raw_draftjs = subject.convert(<<~HTML)
-      <div dir="ltr">
-        <div><div><div>test</div></div></div>
-        <a href="http://example1.example.com">example 1</a>
-      </div>
-    HTML
-
-    expect(raw_draftjs).to eq_raw_draftjs {
-      text_block "test"
-
-      text_block "example 1"
-      apply_entity 'LINK', 0..8, mutability: 'MUTABLE', data: { href: 'http://example1.example.com' }
-    }
-  end
 end

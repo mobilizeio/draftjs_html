@@ -11,7 +11,7 @@ module DraftjsHtml
     def initialize(options = {})
       @draftjs = Draftjs::RawBuilder.new
       @parser = Nokogiri::HTML4::SAX::Parser.new(self)
-      @depth_stack = DepthStack.new(is_semantic_markup: options.fetch(:is_semantic_markup, true))
+      @depth_stack = DepthStack.new
       @options = ensure_options!(options.dup)
     end
 
