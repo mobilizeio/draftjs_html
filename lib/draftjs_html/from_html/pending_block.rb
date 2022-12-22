@@ -1,7 +1,7 @@
 module DraftjsHtml
   class FromHtml < Nokogiri::XML::SAX::Document
-    PendingBlock = Struct.new(:tagname, :attrs, :chars, :entities, :pending_entities, :parent_tagnames, :depth, keyword_init: true) do
-      def self.from_tag(name, attrs, parent_tagnames, depth)
+    PendingBlock = Struct.new(:tagname, :attrs, :chars, :entities, :pending_entities, :parent_tagnames, :depth, :options, keyword_init: true) do
+      def self.from_tag(name, attrs, parent_tagnames, depth, options: {})
         self.new(
           tagname: name,
           attrs: attrs,
@@ -10,6 +10,7 @@ module DraftjsHtml
           pending_entities: [],
           depth: depth,
           parent_tagnames: parent_tagnames,
+          options: options
         )
       end
 
@@ -34,6 +35,8 @@ module DraftjsHtml
       def flush_to(draftjs)
         text_buffer.each_line do |line|
           block_type = line.atomic? ? 'atomic' : block_name
+          next unless should_flush_line?(line)
+
           draftjs.typed_block(block_type, line.text, depth: [depth, 0].max)
 
           line.entity_ranges.each do |entity_range|
@@ -61,6 +64,13 @@ module DraftjsHtml
 
       def text_buffer=(other)
         self[:chars] = other
+      end
+
+      def should_flush_line?(chars)
+        return true if chars.atomic?
+        return true unless options[:squeeze_whitespace_blocks]
+
+        options[:squeeze_whitespace_blocks] && chars.more_than_whitespace?
       end
     end
   end

@@ -10,7 +10,7 @@ module DraftjsHtml
       end
 
       def push(tagname, attrs)
-        @stack << PendingBlock.from_tag(tagname, attrs, @nodes.dup, @list_depth)
+        @stack << PendingBlock.from_tag(tagname, attrs, @nodes.dup, @list_depth, options: @options)
         track_block_node(tagname)
       end
 

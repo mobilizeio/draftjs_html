@@ -60,6 +60,10 @@ module DraftjsHtml
         size > 0
       end
 
+      def more_than_whitespace?
+        !text.match?(/^[[:space:]]*$/)
+      end
+
       def atomic?
         @chars.any? && @chars.all?(&:atomic?)
       end

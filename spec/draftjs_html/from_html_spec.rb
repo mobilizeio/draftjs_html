@@ -554,4 +554,32 @@ RSpec.describe DraftjsHtml::FromHtml do
       typed_block 'unordered-list-item', 'item 1.1', depth: 1
     }
   end
+
+  it 'allows flattening many consecutive whitespace blocks into one with the `squeeze_whitespace_blocks` option' do
+    subject = described_class.new(squeeze_whitespace_blocks: true)
+    raw_draftjs = subject.convert(<<~HTML)
+      <div> <div><br></div><div>Winter </div><div>is</div> <div>coming</div></div>
+    HTML
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      text_block 'Winter '
+      text_block 'is'
+      text_block 'coming'
+    }
+  end
+
+  it 'retains significant whitespace when `squeeze_whitespace_blocks` is true' do
+    subject = described_class.new(squeeze_whitespace_blocks: true)
+    raw_draftjs = subject.convert(<<~HTML)
+      <div><div><img src="https://example.com/image.png"/></div><div>Winter </div><div>is</div> <div>coming</div></div>
+    HTML
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      typed_block 'atomic', ' '
+      apply_entity 'IMAGE', 0..0, data: { src: 'https://example.com/image.png' }
+      text_block 'Winter '
+      text_block 'is'
+      text_block 'coming'
+    }
+  end
 end
