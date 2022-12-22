@@ -56,6 +56,7 @@ module DraftjsHtml
       when *FromHtml::LIST_PARENT_ELEMENTS
         @depth_stack.push_parent(name, attrs)
       else
+        @depth_stack.flush_to(@draftjs) if FromHtml::FLUSH_BOUNDARIES.include?(name)
         @depth_stack.push(name, attributes)
       end
 

@@ -365,7 +365,7 @@ RSpec.describe DraftjsHtml::FromHtml do
       text_block 'Header line 1'
       text_block 'Header line 2'
       text_block 'Body line 1'
-      text_block 'Body line 2', depth: 1
+      text_block 'Body line 2'
     }
   end
 
@@ -415,13 +415,15 @@ RSpec.describe DraftjsHtml::FromHtml do
     }
   end
 
-  it 'treats top-level `divs` as block elements' do
+  it 'treats `divs` as block elements' do
     raw_draftjs = subject.convert(<<~HTML)
       <div>Winter <div>is</div> coming</div>
     HTML
 
     expect(raw_draftjs).to eq_raw_draftjs {
-      typed_block 'unstyled', "Winter is coming"
+      text_block 'Winter '
+      text_block 'is'
+      text_block ' coming'
     }
   end
 
@@ -446,7 +448,7 @@ RSpec.describe DraftjsHtml::FromHtml do
 
     expect(raw_draftjs).to eq_raw_draftjs {
       typed_block 'unstyled', "Winter"
-      typed_block 'unstyled', "is coming", depth: 1
+      typed_block 'unstyled', "is coming"
     }
   end
 
@@ -534,11 +536,30 @@ RSpec.describe DraftjsHtml::FromHtml do
     }
   end
 
-  it 'can treat divs as semantic block-elements via `is_semantic_markup: false`' do
+  it 'properly creates lists inside tables' do
+    subject = described_class.new
+    raw_draftjs = subject.convert(<<~HTML)
+    <table>
+      <tr>
+        <td>
+          <ul><li>item 1</li>
+          <ul><li>item 1.1</li></ul></ul>
+        </td>
+      </tr>
+    </table>
+    HTML
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      typed_block 'unordered-list-item', 'item 1'
+      typed_block 'unordered-list-item', 'item 1.1', depth: 1
+    }
+  end
+
+  it 'tries to interpret intent when `is_semantic_markup` is false' do
     subject = described_class.new(is_semantic_markup: false)
     raw_draftjs = subject.convert(<<~HTML)
       <div dir="ltr">
-        <div>test</div>
+        <div><div><div>test</div></div></div>
         <a href="http://example1.example.com">example 1</a>
       </div>
     HTML

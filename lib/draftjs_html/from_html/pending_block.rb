@@ -23,7 +23,7 @@ module DraftjsHtml
       end
 
       def flushable?
-        %w[OPENING ol ul li table].include?(parent_tagnames.last) ||
+        FLUSH_BOUNDARIES.include?(parent_tagnames.last) ||
           (parent_tagnames.last == 'div' && tagname != 'div') ||
           (!is_semantic_markup && tagname == 'div')
       end
@@ -49,6 +49,8 @@ module DraftjsHtml
               draftjs.inline_style(style_range.style, style_range.range)
             end
           end
+
+          self.text_buffer = CharList.new
         end
       end
 
