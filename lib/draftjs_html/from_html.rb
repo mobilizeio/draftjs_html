@@ -102,6 +102,7 @@ module DraftjsHtml
         when 'img' then { type: 'IMAGE', mutability: 'IMMUTABLE', atomic: true, data: attrs }
         end
       }
+      opts[:squeeze_whitespace_blocks] ||= false
       opts
     end
   end
