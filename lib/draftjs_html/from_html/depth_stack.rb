@@ -1,11 +1,12 @@
 module DraftjsHtml
   class FromHtml < Nokogiri::XML::SAX::Document
     class DepthStack
-      def initialize
+      def initialize(options)
         @stack = []
         @nodes = []
         @list_depth = -1
         @active_styles = []
+        @options = options
       end
 
       def push(tagname, attrs)

@@ -12,7 +12,7 @@ module DraftjsHtml
       @draftjs = Draftjs::RawBuilder.new
       @parser = Nokogiri::HTML4::SAX::Parser.new(self)
       @options = ensure_options!(options.dup)
-      @depth_stack = DepthStack.new
+      @depth_stack = DepthStack.new(@options)
     end
 
     def convert(raw_html)
