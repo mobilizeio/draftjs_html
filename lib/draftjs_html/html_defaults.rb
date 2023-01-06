@@ -1,6 +1,7 @@
 module DraftjsHtml
   module HtmlDefaults
     BLOCK_TYPE_TO_HTML = {
+      'article' => 'p',
       'paragraph' => 'p',
       'unstyled' => 'p',
       'header-one' => 'h1',
