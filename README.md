@@ -229,6 +229,44 @@ The callable should return a Hash with symbol keys. The supported values are:
 - `data` (optional, default `{}`)
   - an arbitrary data-bag (Hash) of entity data
 
+### Spec support
+
+To make it easier to test our own code, we've developed a few RSpec matchers that
+make normalization and comparison of raw DraftJS use the RawBuilder DSL. To take
+advantage of this, you can (for RSpec only, currently) include the following in
+your `spec_helper`, or equivalent.
+
+```ruby
+require 'draftjs_html/spec_support/rspec'
+
+RSpec.configure do |config|
+  config.include DraftjsHtml::SpecSupport::RSpecMatchers
+end
+```
+
+Then, later in your tests, you can assert on raw DraftJS "json" like this:
+
+```ruby
+my_raw_draftjs_hash = { blocks: [{ key: 'a-random-uuid', text: 'Hi!' }], entityMap: {} }
+
+expect(my_raw_draftjs_hash).to eq_raw_draftjs {
+  text_block 'Hi!'
+}
+```
+
+This will normalize the `key` values and other IDs to make _actual_ differences
+easier to spot.
+
+There's also a matcher called `eq_raw_draftjs_ignoring_keys` that takes an explicit
+raw DraftJS hash on both sides.
+
+```ruby
+my_raw_draftjs_hash = { blocks: [{ key: 'a-random-uuid', text: 'Hi!' }], entityMap: {} }
+my_other_draftjs_hash = { blocks: [{ key: 'a-different-random-uuid', text: 'Hi!' }], entityMap: {} }
+
+expect(my_raw_draftjs_hash).to eq_raw_draftjs_ignoring_keys my_other_draftjs_hash
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run
