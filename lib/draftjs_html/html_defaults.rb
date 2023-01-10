@@ -1,6 +1,7 @@
 module DraftjsHtml
   module HtmlDefaults
     BLOCK_TYPE_TO_HTML = {
+      'section' => 'p',
       'article' => 'p',
       'paragraph' => 'p',
       'unstyled' => 'p',
