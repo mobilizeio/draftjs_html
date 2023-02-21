@@ -113,9 +113,7 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Block Depth & Nesting' do
   it 'gracefully handles depth when parents are missing' do
     raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
       typed_block 'unstyled', 'START'
-      typed_block 'unordered-list-item', 'item 1.1', depth: 1
-      typed_block 'unordered-list-item', 'item 1.2', depth: 2
-      typed_block 'unordered-list-item', 'item 2.0', depth: 1
+      typed_block 'unordered-list-item', 'item 1.1', depth: 2
       typed_block 'unstyled', 'END'
     end
 
@@ -123,11 +121,47 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Block Depth & Nesting' do
 
     expect(html).to eq_ignoring_whitespace <<~HTML.strip
       <p>START</p>
-      <ul>
-        <li>item 1.1</li>
-        <ul><li>item 1.2</li></ul>
-        <li>item 2.0</li>
-      </ul>
+      <ul><li>
+        <ul><li>
+          <ul><li>item 1.1</li></ul>
+        </li></ul>
+      </li></ul>
+      <p>END</p>
+    HTML
+  end
+
+  it 'gracefully handles depth with arbitrary depth jumps' do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
+      typed_block 'unstyled', 'START'
+      typed_block 'unordered-list-item', 'item 1.1', depth: 1
+      typed_block 'unordered-list-item', 'item 1.2', depth: 5
+      typed_block 'unordered-list-item', 'item 1.2.1', depth: 5
+      typed_block 'unordered-list-item', 'item 2.1', depth: 1
+      typed_block 'unstyled', 'END'
+    end
+
+    html = described_class.to_html(raw_draftjs)
+
+    expect(html).to eq_ignoring_whitespace <<~HTML.strip
+      <p>START</p>
+      <ul><li>
+        <ul>
+          <li>
+            item 1.1
+            <ul><li>
+              <ul><li>
+                <ul><li>
+                  <ul>
+                    <li>item 1.2</li>
+                    <li>item 1.2.1</li>
+                  </ul>
+                </li></ul>
+              </li></ul>
+            </li></ul>
+          </li>
+          <li>item 2.1</li>
+        </ul>
+      </li></ul>
       <p>END</p>
     HTML
   end
