@@ -67,7 +67,7 @@ module DraftjsHtml
     end
 
     def pop_parent
-      @body.parent = @previous_parents.pop
+      @body.parent = @previous_parents.pop unless @previous_parents.empty?
     end
 
     def create_child(tagname)

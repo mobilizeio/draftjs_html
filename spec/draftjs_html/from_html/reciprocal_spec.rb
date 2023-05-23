@@ -19,4 +19,32 @@ RSpec.describe DraftjsHtml::FromHtml, 'Start->ToHtml->FromHtml == Start' do
     expect(DraftjsHtml.to_html(raw_draftjs)).to eq '<p>Hi, <a href="https://example.com/kittens">a</a></p>'
     expect(DraftjsHtml.from_html(DraftjsHtml.to_html(raw_draftjs))).to eq_raw_draftjs_ignoring_keys raw_draftjs
   end
+
+  it 'can properly convert Microsoft Outlook nested ULs to HTML' do
+    subject = described_class.new(squeeze_whitespace_blocks: true)
+    raw_draftjs = subject.convert(<<~HTML)
+      <div>
+          <ul>
+              <ul>
+                  <li>item 1.1</li>
+              </ul>
+          </ul>
+          <p>oh, hello</p>
+          <ul>
+              <ul>
+                  <li>item 2.1</li>
+              </ul>
+          </ul>
+      </div>
+      <span>TTFN</span>
+    HTML
+    DraftjsHtml.to_html(raw_draftjs, options: {})
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      typed_block 'unordered-list-item', 'item 1.1', depth: 1
+      text_block 'oh, hello'
+      typed_block 'unordered-list-item', 'item 2.1', depth: 1
+      text_block 'TTFN'
+    }
+  end
 end
