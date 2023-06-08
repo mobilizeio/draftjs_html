@@ -379,4 +379,24 @@ RSpec.describe DraftjsHtml do
       <p>Come visit <b><a href="https://westeros.example.com">#Westeros!</a></b></p>
     HTML
   end
+
+  it 'lists with unstyled content inside do not cause infinite loops' do
+    raw_draftjs = DraftjsHtml::Draftjs::RawBuilder.build do
+      typed_block 'unordered-list-item', 'Item 1.1', depth: 0
+      typed_block 'unordered-list-item', 'Item 1.1.1', depth: 1
+      typed_block 'unstyled', 'Item 1.1.1 - 2', depth: 1
+      typed_block 'unstyled', 'Item 1.1.1 - 3', depth: 1
+      typed_block 'unordered-list-item', 'Item 1.2', depth: 0
+    end
+
+    expect(DraftjsHtml.to_html(raw_draftjs)).to eq_ignoring_whitespace(<<~HTML)
+      <ul><li>Item 1.1
+          <ul><li>Item 1.1.1
+                  <p>Item 1.1.1 - 2</p><p>Item 1.1.1 - 3</p>
+              </li></ul>
+          </li>
+          <li>Item 1.2</li>
+      </ul>
+    HTML
+  end
 end

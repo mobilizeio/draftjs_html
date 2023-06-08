@@ -11,113 +11,133 @@ module DraftjsHtml
     def initialize(body)
       @current_depth = 0
       @body = body
-      @previous_parents = [body.parent]
-      @nesting_roots = [body.parent.name]
+      @previous_block = nil
     end
 
-    def apply(block)
-      return unless nesting_root_changed?(block) || depth_changed?(block)
+    LIST_ROOTS = %w[ol ul]
 
-      if deepening?(block)
-        deepen(block, desired_depth_change: block.depth - @current_depth)
-      elsif rising?(block) && still_nested?(block)
-        rise(times: @current_depth - block.depth)
-      elsif rising?(block)
-        rise(times: @current_depth - block.depth)
-        pop_parent
-      elsif still_nested?(block)
+    def apply(block)
+      if block.type == 'code-block'
         push_parent(block)
-      elsif nested?
-        pop_parent
+        store_previous(block)
+        return
       end
 
-      @current_depth = block.depth
+      # Nesting lists - extra content same level
+      if @current_depth > 0 && block.depth == @current_depth && block.type != @previous_block&.type
+        set_li_as_root
+        store_previous(block)
+        return
+      end
+
+      # Nesting lists - deepening inside a proper list
+      if block.depth == @current_depth + 1 && block.type == @previous_block&.type
+        set_li_as_root
+        push_parent(block)
+        store_previous(block)
+        return
+      end
+
+      # Nesting lists - deepening skipping level 0
+      if block.depth > @current_depth && !list_block?(@previous_block)
+        while @current_depth < block.depth
+          push_parent(block)
+          @body.parent = create_child('li')
+          @current_depth += 1
+        end
+        push_parent(block)
+        store_previous(block)
+        return
+      end
+
+      # Nesting lists - deepening from inside skipping several levels
+      if block.depth > @current_depth && list_block?(@previous_block)
+        set_li_as_root
+        while block.depth > @current_depth + 1
+          push_parent(block)
+          @body.parent = create_child('li')
+          @current_depth += 1
+        end
+        push_parent(block)
+        store_previous(block)
+        return
+      end
+
+      # Nesting lists - rising
+      if block.depth < @current_depth
+        # pop_to_nearest_list_root, n times
+        (@current_depth - block.depth).times do
+          if @body.parent.name == 'li'
+            pop_parent
+            pop_parent
+            pop_parent
+          elsif LIST_ROOTS.include?(@body.parent.name)
+            pop_parent
+            pop_parent
+          else
+            pop_parent
+          end
+        end
+      end
+
+      # Sibling list items
+      if block.depth == 0 && list_block?(block) && @previous_block&.type == block.type
+        store_previous(block)
+        return
+      end
+
+      # Any-old root list item
+      if block.depth == 0 && list_block?(block) && @previous_block&.depth.to_i == 0
+        push_parent(block)
+        store_previous(block)
+        return
+      end
+
+      # Leaving the list
+      if block.depth == 0 && !list_block?(block) && (list_block?(@previous_block) || @previous_block&.depth.to_i > 0)
+        pop_to_document_root
+        store_previous(block)
+        return
+      end
+
+      store_previous(block)
     end
 
     private
 
-    def deepen(block, desired_depth_change: 0)
-      if inside_valid_nesting_root?
-        set_previous_li_as_parent(block)
-      else
-        create_valid_nesting_root(block)
-      end
+    def store_previous(block)
+      @current_depth = block.depth
+      @previous_block = block
+    end
 
-      (desired_depth_change - 1).times do
-        create_valid_nesting_root(block)
-      end
+    def list_block?(block)
+      block&.type&.end_with?('list-item')
+    end
 
-      push_parent(block)
+    def pop_to_document_root
+      pop_parent until current_root_name == 'body'
+    end
+
+    def current_root_name
+      @body.parent.name
     end
 
     def push_parent(block)
       tagname = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
       node = create_child(tagname)
-      @previous_parents << @body.parent
       @body.parent = node
     end
 
-    def rise(times:)
-      times.times do
-        begin
-          pop_parent
-        end while @body.parent.name != @nesting_roots.last
-        @nesting_roots.pop
-      end
-    end
-
     def pop_parent
-      @body.parent = @previous_parents.pop unless @previous_parents.empty?
+      @body.parent = @body.parent.parent
     end
 
     def create_child(tagname)
       @body.parent.add_child(@body.doc.create_element(tagname))
     end
 
-    def nested?
-      @body.parent.name != 'body'
-    end
-
-    def still_nested?(block)
-      BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
-    end
-
-    def depth_changed?(block)
-      block.depth != @current_depth
-    end
-
-    def nesting_root_changed?(block)
-      @body.parent.name != BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
-    end
-
-    def rising?(block)
-      @current_depth > block.depth
-    end
-
-    def deepening?(block)
-      @current_depth < block.depth
-    end
-
-    def create_valid_nesting_root(block)
-      parent_tagname = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
-      node = create_child(parent_tagname)
-      @previous_parents << node
-      @nesting_roots << parent_tagname
-      @body.parent = node
-
-      list_item = create_child('li')
-      @body.parent = list_item
-    end
-
-    def set_previous_li_as_parent(block)
-      tagname = BLOCK_TYPE_TO_HTML_WRAPPER[block.type]
-      @previous_parents << @body.parent
-      @nesting_roots << tagname
+    def set_li_as_root
       @body.parent = @body.parent.last_element_child
-    end
-
-    def inside_valid_nesting_root?
-      BLOCK_TYPE_TO_HTML_WRAPPER.values.include?(@body.parent.name)
     end
   end
 end

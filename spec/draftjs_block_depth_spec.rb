@@ -68,8 +68,9 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Block Depth & Nesting' do
       <p>Top level</p>
       <ol>
         <li>Item 1
-          <ol><li>Item 1.1</li></ol>
-          <p>Has depth, but just a tag</p>
+          <ol><li>Item 1.1
+                  <p>Has depth, but just a tag</p>
+              </li></ol>
         </li>
       </ol>
       <br>
@@ -94,16 +95,14 @@ RSpec.describe DraftjsHtml, 'DraftjsHtml - Block Depth & Nesting' do
       <ul>
         <li>item 1
           <ul>
-            <li>item 1.1</li>
+            <li>item 1.1<br></li>
           </ul>
-          <br>
         </li>
         <li>item 2
           <ul>
             <li>item 2.1</li>
-            <li>item 2.2</li>
+            <li>item 2.2<br></li>
           </ul>
-          <br>
         </li>
       </ul>
       <p></p>
