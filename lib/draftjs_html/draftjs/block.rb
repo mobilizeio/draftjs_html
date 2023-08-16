@@ -73,6 +73,10 @@ module DraftjsHtml
       def add_style(name, range)
         inline_styles << ApplicableRange.new(name: name, range: range)
       end
+
+      def add_entity(key, range)
+        entity_ranges << ApplicableRange.new(name: key, range: range)
+      end
     end
   end
 end

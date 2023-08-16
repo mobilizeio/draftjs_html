@@ -18,8 +18,23 @@ module DraftjsHtml
         entity_map[key]
       end
 
+      def attach_entity(entity, block, range)
+        new_key = new_entity_key
+        entity_map[new_key] = entity
+        block.add_entity(new_key, range)
+      end
+
       def to_raw
         ToRaw.new.convert(self)
+      end
+
+      private
+
+      def new_entity_key
+        loop do
+          key = SecureRandom.uuid
+          break key unless entity_map.key?(key)
+        end
       end
     end
   end
