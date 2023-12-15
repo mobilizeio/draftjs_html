@@ -239,6 +239,9 @@ See `DraftjsHtml::Draftjs::NullContent` for its implementation – the API match
 
 **Note:** Neither of the parse methods parse JSON strings, they expect Ruby hash objects.
 
+These parsed objects support rudimentary validation.
+Note that the `DraftjsHtml::Draftjs::NullContent` version always presents as invalid.
+
 ### Spec support
 
 To make it easier to test our own code, we've developed a few RSpec matchers that

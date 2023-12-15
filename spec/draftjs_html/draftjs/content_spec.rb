@@ -44,4 +44,16 @@ RSpec.describe DraftjsHtml::Draftjs::Content do
       expect(block.entity_ranges.first.range).to eq 0..2
     end
   end
+
+  describe '#valid?' do
+    it 'returns true when the data is valid' do
+      expect(described_class.new([], {})).to be_valid
+    end
+  end
+
+  describe '#invalid?' do
+    it 'returns false when the data is invalid' do
+      expect(described_class.new(nil, nil)).not_to be_invalid
+    end
+  end
 end

@@ -39,4 +39,16 @@ RSpec.describe DraftjsHtml::Draftjs::NullContent do
       expect(subject.to_raw).to eq({ 'blocks' => [], 'entityMap' => {} })
     end
   end
+
+  describe '#valid?' do
+    it 'returns false always' do
+      expect(subject).to_not be_valid
+    end
+  end
+
+  describe '#invalid?' do
+    it 'returns true always' do
+      expect(subject).to be_invalid
+    end
+  end
 end

@@ -22,6 +22,14 @@ module DraftjsHtml
       def to_raw
         ToRaw.new.convert(self)
       end
+
+      def valid?
+        false
+      end
+
+      def invalid?
+        true
+      end
     end
   end
 end

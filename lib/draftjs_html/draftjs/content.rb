@@ -8,7 +8,7 @@ module DraftjsHtml
         new(raw['blocks'].map { Block.parse(**_1) }, EntityMap.parse(raw['entityMap']))
       end
 
-      private_class_method def self.validate_raw_input!(raw)
+      def self.validate_raw_input!(raw)
         raise InvalidRawDraftjs.new('raw cannot be nil') if raw.nil?
         raise InvalidRawDraftjs.new('raw must contain "blocks" array') unless raw['blocks'].is_a?(Array)
         raise InvalidRawDraftjs.new('raw must contain "entityMap" hash') unless raw['entityMap'].is_a?(Hash)
@@ -33,6 +33,17 @@ module DraftjsHtml
 
       def to_raw
         ToRaw.new.convert(self)
+      end
+
+      def valid?
+        self.class.validate_raw_input!({ 'blocks' => blocks, 'entityMap' => entity_map })
+        true
+      rescue
+        false
+      end
+
+      def invalid?
+        !!valid?
       end
 
       private
