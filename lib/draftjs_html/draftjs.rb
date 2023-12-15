@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'draftjs/content'
+require_relative 'draftjs/null_content'
 require_relative 'draftjs/character_meta'
 require_relative 'draftjs/applicable_range'
 require_relative 'draftjs/block'
@@ -13,6 +14,12 @@ module DraftjsHtml
   module Draftjs
     def self.parse(raw)
       Content.parse(raw)
+    end
+
+    def self.safe_parse(raw)
+      Content.parse(raw)
+    rescue
+      NullContent.new
     end
   end
 end

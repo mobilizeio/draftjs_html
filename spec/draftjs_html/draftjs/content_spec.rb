@@ -1,6 +1,26 @@
 # frozen_string_literal: true
 
 RSpec.describe DraftjsHtml::Draftjs::Content do
+  describe '::parse' do
+    let(:raw_input) { { 'blocks' => [], 'entityMap' => {} } }
+
+    it 'can parse a valid raw draftjs' do
+      expect(described_class.parse(raw_input)).to be_a(DraftjsHtml::Draftjs::Content)
+    end
+
+    it 'raises an InvalidRawDraftjs error when raw is nil' do
+      expect { described_class.parse(nil) }.to raise_error(DraftjsHtml::InvalidRawDraftjs)
+    end
+
+    it 'raises an InvalidRawDraftjs error when raw["blocks"] is not an array' do
+      expect { described_class.parse(raw_input.merge('blocks' => nil)) }.to raise_error(DraftjsHtml::InvalidRawDraftjs)
+    end
+
+    it 'raises an InvalidRawDraftjs error when raw["entityMap"] is not a hash' do
+      expect { described_class.parse(raw_input.merge('entityMap' => nil)) }.to raise_error(DraftjsHtml::InvalidRawDraftjs)
+    end
+  end
+
   describe '#attach_entity' do
     it 'attaches an entity to a blocks range' do
       block = DraftjsHtml::Draftjs::Block.parse({ 'text' => 'any old text' })

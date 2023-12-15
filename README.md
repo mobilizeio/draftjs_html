@@ -229,6 +229,16 @@ The callable should return a Hash with symbol keys. The supported values are:
 - `data` (optional, default `{}`)
   - an arbitrary data-bag (Hash) of entity data
 
+### Draftjs parsing
+
+If you want to directly manipulate the structure of the Draftjs, you can use the `DraftjsHtml::Draftjs.parse(raw_draftjs)` directly.
+This method assumes that the `raw_draftjs` hash is well-formed & valid, containing the `"blocks"` and `"entityMap"` keys.
+
+If you’re dealing with unknown input, you can use `.safe_parse` instead to return a guaranteed, benign object.
+See `DraftjsHtml::Draftjs::NullContent` for its implementation – the API matches that of `DraftjsHtml::Draftjs::Content`.
+
+**Note:** Neither of the parse methods parse JSON strings, they expect Ruby hash objects.
+
 ### Spec support
 
 To make it easier to test our own code, we've developed a few RSpec matchers that

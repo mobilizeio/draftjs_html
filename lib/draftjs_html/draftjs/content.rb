@@ -4,7 +4,14 @@ module DraftjsHtml
   module Draftjs
     class Content
       def self.parse(raw)
+        validate_raw_input!(raw)
         new(raw['blocks'].map { Block.parse(**_1) }, EntityMap.parse(raw['entityMap']))
+      end
+
+      private_class_method def self.validate_raw_input!(raw)
+        raise InvalidRawDraftjs.new('raw cannot be nil') if raw.nil?
+        raise InvalidRawDraftjs.new('raw must contain "blocks" array') unless raw['blocks'].is_a?(Array)
+        raise InvalidRawDraftjs.new('raw must contain "entityMap" hash') unless raw['entityMap'].is_a?(Hash)
       end
 
       attr_reader :blocks, :entity_map
