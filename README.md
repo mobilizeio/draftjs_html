@@ -139,7 +139,7 @@ DraftjsHtml.to_html(raw_draftjs, options: {
 })
 ```
 
-# This would generate <strong> tags instead of <b> tags around ranges of `BOLD` inline styles.
+**Note:** This would generate <strong> tags instead of <b> tags around ranges of `BOLD` inline styles.
 
 #### `:inline_style_renderer`
 
