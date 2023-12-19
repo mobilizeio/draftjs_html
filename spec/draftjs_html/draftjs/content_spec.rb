@@ -52,8 +52,8 @@ RSpec.describe DraftjsHtml::Draftjs::Content do
   end
 
   describe '#invalid?' do
-    it 'returns false when the data is invalid' do
-      expect(described_class.new(nil, nil)).not_to be_invalid
+    it 'returns true when the data is invalid' do
+      expect(described_class.new(nil, nil)).to be_invalid
     end
   end
 end

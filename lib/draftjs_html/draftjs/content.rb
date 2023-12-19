@@ -43,7 +43,7 @@ module DraftjsHtml
       end
 
       def invalid?
-        !!valid?
+        !valid?
       end
 
       private
