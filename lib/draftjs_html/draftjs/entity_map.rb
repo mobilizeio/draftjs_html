@@ -5,7 +5,7 @@ module DraftjsHtml
     class EntityMap < Hash
       def self.parse(raw)
         instance = new
-        raw.each { |key, raw_entity| instance[key] = Entity.parse(raw_entity) }
+        raw.each { |key, raw_entity| instance[key] = Entity.parse(raw_entity, key: key) }
         instance
       end
     end

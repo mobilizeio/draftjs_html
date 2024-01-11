@@ -25,8 +25,8 @@ module DraftjsHtml
         entity_map[key]
       end
 
-      def attach_entity(entity, block, range)
-        new_key = new_entity_key
+      def attach_entity(entity, block, range, key: nil)
+        new_key = key || new_entity_key
         entity_map[new_key] = entity
         block.add_entity(new_key, range)
       end
