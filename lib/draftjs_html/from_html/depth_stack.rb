@@ -34,7 +34,14 @@ module DraftjsHtml
 
       def pop(draftjs)
         return if @stack.empty?
-        return if inside_parent?
+        if inside_parent?
+          if inside_list_item? && block_content?
+            @stack[-2].consume(current)
+            @stack.pop
+          end
+
+          return
+        end
 
         if @nodes.last == current.tagname && current.flushable?
           flush_to(draftjs)
@@ -100,6 +107,14 @@ module DraftjsHtml
 
       def inside_parent?
         (FromHtml::LIST_PARENT_ELEMENTS & @nodes).any?
+      end
+
+      def inside_list_item?
+        (FromHtml::LIST_ITEM_ELEMENTS & @nodes).any?
+      end
+
+      def block_content?
+        BLOCK_CONTENT_ELEMENTS.include?(current.tagname)
       end
 
       def current
