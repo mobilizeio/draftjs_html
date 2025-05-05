@@ -99,6 +99,42 @@ RSpec.describe DraftjsHtml::FromHtml do
     }
   end
 
+  it '"ignores" invalid block elements inside list item elements' do
+    raw_draftjs = subject.convert(<<~HTML)
+      <ul>
+        <li>Item 1 <p>a second line about item 1</p></li>
+      </ul>
+    HTML
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      typed_block 'unordered-list-item', 'Item 1 a second line about item 1', depth: 0
+    }
+  end
+
+  it '"ignores" invalid block elements inside nested list item elements' do
+    raw_draftjs = subject.convert(<<~HTML)
+      <ul>
+        <li>Item 1 
+          <p>a second line about item 1</p>
+          <ul>
+            <li>Item 1.1</li>
+            <li>
+                <p>Item 1.2</p>
+            </li>
+          </ul>
+        </li>
+        <li>Item 2</li>
+      </ul>
+    HTML
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      typed_block 'unordered-list-item', 'Item 1 a second line about item 1', depth: 0
+      typed_block 'unordered-list-item', 'Item 1.1', depth: 1
+      typed_block 'unordered-list-item', 'Item 1.2', depth: 1
+      typed_block 'unordered-list-item', 'Item 2', depth: 0
+    }
+  end
+
   it 'converts `<b>` tags into a `BOLD` `inlineStyleRange`' do
     raw_draftjs = subject.convert(<<~HTML)
       <p>Winter <b>is</b> coming</p>
