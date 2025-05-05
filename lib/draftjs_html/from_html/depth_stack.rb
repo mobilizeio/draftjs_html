@@ -39,8 +39,8 @@ module DraftjsHtml
 
         if @nodes.last == current.tagname && current.flushable?
           flush_to(draftjs)
-        elsif previous
-          previous.consume(current)
+        elsif parent
+          parent.consume(current)
         end
 
         @stack.pop
@@ -100,7 +100,7 @@ module DraftjsHtml
       end
 
       def merge_current_into_parent!
-        previous.consume(current)
+        parent.consume(current)
         @stack.pop
       end
 
@@ -124,7 +124,7 @@ module DraftjsHtml
         @stack.last
       end
 
-      def previous
+      def parent
         @stack[-2]
       end
     end
