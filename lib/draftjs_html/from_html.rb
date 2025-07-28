@@ -10,7 +10,8 @@ module DraftjsHtml
 
     def initialize(options = {})
       @draftjs = Draftjs::RawBuilder.new
-      @parser = Nokogiri::HTML4::SAX::Parser.new(self)
+      encoding = options.key?(:encoding) ? options.delete(:encoding) : 'UTF-8'
+      @parser = Nokogiri::HTML4::SAX::Parser.new(self, encoding)
       @options = ensure_options!(options.dup)
       @depth_stack = DepthStack.new(@options)
     end

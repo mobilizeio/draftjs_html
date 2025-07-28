@@ -204,6 +204,18 @@ There are some known limitations with this approach, but, if you're just trying
 to get started, it may be good enough for you. Contributions and issue reports
 are welcome and encouraged.
 
+### FromHtml Options
+
+#### `:encoding`
+
+Specify the HTML parsing encoding.
+Defaults to `UTF-8`.
+
+#### `:squeeze_whitespace_blocks`
+
+Removes whitespace only blocks from the generated DraftJS.
+Defaults to `false`.
+
 #### `:node_to_entity:`
 
 This `FromHtml` option allows the user to specify how a particular node is
