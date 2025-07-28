@@ -1,6 +1,30 @@
 # frozen_string_literal: true
 
 RSpec.describe DraftjsHtml::FromHtml do
+  it 'defaults to UTF-8 encoding when parsing' do
+    subject = described_class.new({})
+
+    raw_draftjs = subject.convert("It’s time to encode!")
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      text_block "It’s time to encode!"
+    }
+  end
+
+  it 'respects the encoding option when parsing' do
+    options = {
+      encoding: nil,
+    }
+
+    subject = described_class.new(options)
+
+    raw_draftjs = subject.convert("It’s time to encode!")
+
+    expect(raw_draftjs).to eq_raw_draftjs {
+      text_block "Itâ\u0080\u0099s time to encode!"
+    }
+  end
+
   it 'converts a line of plaintext into a single DraftJS block' do
     raw_draftjs = subject.convert('a line of raw text')
 
@@ -575,14 +599,14 @@ RSpec.describe DraftjsHtml::FromHtml do
   it 'properly creates lists inside tables' do
     subject = described_class.new
     raw_draftjs = subject.convert(<<~HTML)
-    <table>
-      <tr>
-        <td>
-          <ul><li>item 1</li>
-          <ul><li>item 1.1</li></ul></ul>
-        </td>
-      </tr>
-    </table>
+      <table>
+        <tr>
+          <td>
+            <ul><li>item 1</li>
+            <ul><li>item 1.1</li></ul></ul>
+          </td>
+        </tr>
+      </table>
     HTML
 
     expect(raw_draftjs).to eq_raw_draftjs {
