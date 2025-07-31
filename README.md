@@ -1,7 +1,7 @@
 # DraftjsHtml
 
 [![Gem Version](https://badge.fury.io/rb/draftjs_html.svg)](https://badge.fury.io/rb/draftjs_html)
-[![Build Status](https://app.travis-ci.com/dugancathal/draftjs_html.svg?branch=main)](https://app.travis-ci.com/dugancathal/draftjs_html)
+[![Build Status](https://github.com/mobilizeio/draftjs_html/actions/workflows/ci.yml/badge.svg)](https://github.com/mobilizeio/draftjs_html/actions/workflows/ci.yml)
 
 This gem provides conversion utilities between "raw" [DraftJS] JSON and HTML.
 My team and I have found a need on many occasions to manipulate and convert
