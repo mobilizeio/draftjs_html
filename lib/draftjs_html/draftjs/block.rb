@@ -25,7 +25,7 @@ module DraftjsHtml
       def each_char
         return to_enum(:each_char) unless block_given?
 
-        text.chars.map.with_index do |char, index|
+        text.each_char.with_index do |char, index|
           yield CharacterMeta.new(
             char: char,
             style_names: inline_styles.select { _1.range.cover?(index) }.map(&:name),
@@ -40,17 +40,17 @@ module DraftjsHtml
 
         current_styles = []
         current_entity = nil
-        ranges = [CharRange.new(text: '', style_names: current_styles, entity_key: current_entity)]
+        ranges = [CharRange.new(text: +'', style_names: current_styles, entity_key: current_entity)]
 
         each_char.with_index do |char, index|
           if char.style_names != current_styles || char.entity_key != current_entity
             current_styles = char.style_names
             current_entity = char.entity_key
             yield(ranges.last) unless index == 0
-            ranges << CharRange.new(text: '', style_names: current_styles, entity_key: current_entity)
+            ranges << CharRange.new(text: +'', style_names: current_styles, entity_key: current_entity)
           end
 
-          ranges.last.text += char.char
+          ranges.last.text << char.char
         end
 
         yield ranges.last
