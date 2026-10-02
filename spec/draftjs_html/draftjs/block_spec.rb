@@ -1,3 +1,4 @@
+require 'benchmark'
 RSpec.describe DraftjsHtml::Draftjs::Block do
   it 'applies styles to each character in the text' do
     raw = DraftjsHtml::Draftjs::RawBuilder.build do
@@ -141,5 +142,17 @@ RSpec.describe DraftjsHtml::Draftjs::Block do
       nil,
       nil, nil, nil, nil, nil, nil,
     ]
+  end
+
+  it 'builds ranges in linear time for long runs of identically-styled text' do
+    build_block = ->(length) { described_class.parse('key' => 'a', 'text' => 'a' * length, 'type' => 'unstyled') }
+    time_ranges = ->(block) { GC.start; Benchmark.realtime { block.each_range.to_a } }
+
+    time_ranges.call(build_block.call(1_000))
+    short_time = time_ranges.call(build_block.call(20_000))
+    long_time = time_ranges.call(build_block.call(80_000))
+
+    expect(long_time / short_time).to be < 8
+    expect(build_block.call(80_000).each_range.map(&:text)).to eq ['a' * 80_000]
   end
 end
